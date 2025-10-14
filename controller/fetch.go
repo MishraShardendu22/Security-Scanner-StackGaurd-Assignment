@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/MishraShardendu22/Scanner/models"
 	"github.com/MishraShardendu22/Scanner/util"
@@ -13,6 +16,16 @@ import (
 	"github.com/kamva/mgm/v3"
 )
 
+// HTTP client for better performance
+var fetchHTTPClient = &http.Client{
+	Timeout: 30 * time.Second,
+	Transport: &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     90 * time.Second,
+	},
+}
+
 // FetchModel fetches a single model from HuggingFace API
 func FetchModel(c *fiber.Ctx) error {
 	modelID := c.Params("modelId")
@@ -20,8 +33,10 @@ func FetchModel(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusBadRequest, "Model ID is required", nil, "")
 	}
 
+	log.Printf("🚀 Fetching model: %s\n", modelID)
+
 	url := fmt.Sprintf("https://huggingface.co/api/models/%s", modelID)
-	resp, err := http.Get(url)
+	resp, err := fetchHTTPClient.Get(url)
 	if err != nil {
 		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to fetch model", nil, "")
 	}
@@ -52,22 +67,43 @@ func FetchModel(c *fiber.Ctx) error {
 		Discussions: []models.DISCUSSION{},
 	}
 
-	// Extract siblings and fetch file content
+	// Extract siblings and fetch file content concurrently
 	if siblings, ok := modelData["siblings"].([]interface{}); ok {
-		for _, sib := range siblings {
+		log.Printf("📂 Found %d files to fetch\n", len(siblings))
+
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+		semaphore := make(chan struct{}, 10)
+
+		for idx, sib := range siblings {
 			if sibMap, ok := sib.(map[string]interface{}); ok {
 				if filename, ok := sibMap["rfilename"].(string); ok {
-					sibling := fetchFileContent(modelID, filename, "models")
-					aiRequest.Siblings = append(aiRequest.Siblings, sibling)
+					wg.Add(1)
+					go func(fname string, index int) {
+						defer wg.Done()
+						semaphore <- struct{}{}
+						defer func() { <-semaphore }()
+
+						log.Printf("  📄 [%d/%d] Fetching: %s\n", index+1, len(siblings), fname)
+						sibling := fetchFileContent(modelID, fname, "models")
+
+						mu.Lock()
+						aiRequest.Siblings = append(aiRequest.Siblings, sibling)
+						mu.Unlock()
+					}(filename, idx)
 				}
 			}
 		}
+		wg.Wait()
+		log.Printf("✅ All %d files fetched\n", len(siblings))
 	}
 
 	// Fetch discussions/PRs if requested
 	if includePRs || includeDiscussion {
+		log.Println("💬 Fetching discussions/PRs...")
 		discussions, _ := fetchDiscussions(modelID, "models", includePRs, includeDiscussion)
 		aiRequest.Discussions = discussions
+		log.Printf("✅ Fetched %d discussions/PRs\n", len(discussions))
 	}
 
 	// Save to database
@@ -242,7 +278,7 @@ func fetchFileContent(resourceID, filename, resourceType string) models.SIBLING 
 	// Construct the file URL: https://huggingface.co/{org}/{name}/resolve/main/{filename}
 	fileURL := fmt.Sprintf("https://huggingface.co/%s/resolve/main/%s", resourceID, filename)
 
-	resp, err := http.Get(fileURL)
+	resp, err := fetchHTTPClient.Get(fileURL)
 	if err != nil {
 		return sibling
 	}
@@ -262,7 +298,7 @@ func fetchFileContent(resourceID, filename, resourceType string) models.SIBLING 
 }
 
 func getDiscussionsFromURL(url string) ([]models.DISCUSSION, error) {
-	resp, err := http.Get(url)
+	resp, err := fetchHTTPClient.Get(url)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"log"
+
 	"github.com/MishraShardendu22/Scanner/models"
 	"github.com/MishraShardendu22/Scanner/util"
 	"github.com/gofiber/fiber/v2"
@@ -17,6 +19,8 @@ func ScanRequest(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusBadRequest, "Request ID is required", nil, "")
 	}
 
+	log.Printf("🔍 Starting scan for request ID: %s\n", requestID)
+
 	// Find the AI_REQUEST by request_id field (not MongoDB _id)
 	aiRequest := &models.AI_REQUEST{}
 	err := mgm.Coll(aiRequest).First(bson.M{"request_id": requestID}, aiRequest)
@@ -24,8 +28,12 @@ func ScanRequest(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusNotFound, "Request not found", nil, "")
 	}
 
+	log.Printf("✅ Found request with %d files and %d discussions\n", len(aiRequest.Siblings), len(aiRequest.Discussions))
+
 	// Perform the scan using the scanner utility
+	log.Println("🔍 Scanning for secrets...")
 	findings := util.ScanAIRequest(*aiRequest, util.SecretConfig)
+	log.Printf("✅ Scan complete! Found %d potential secrets\n", len(findings))
 
 	// Group findings by resource
 	scannedResources := groupFindingsByResource(findings, aiRequest)
@@ -68,6 +76,8 @@ func ScanOrgModels(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusBadRequest, "Organization name is required", nil, "")
 	}
 
+	log.Printf("🏢 Starting organization model scan: %s\n", org)
+
 	// Find all AI_Models for this organization
 	aiModels := []models.AI_Models{}
 	err := mgm.Coll(&models.AI_Models{}).SimpleFind(&aiModels, bson.M{"org": org})
@@ -79,6 +89,8 @@ func ScanOrgModels(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusNotFound, "No models found for this organization", nil, "")
 	}
 
+	log.Printf("✅ Found %d models for organization\n", len(aiModels))
+
 	// Find all AI_REQUESTs related to these models
 	// Note: This assumes you're storing the relationship. If not, you'll need to modify this logic
 	var allFindings []models.Finding
@@ -88,12 +100,20 @@ func ScanOrgModels(c *fiber.Ctx) error {
 	aiRequests := []models.AI_REQUEST{}
 	mgm.Coll(&models.AI_REQUEST{}).SimpleFind(&aiRequests, bson.M{})
 
-	for _, req := range aiRequests {
+	log.Printf("🔍 Scanning %d requests...\n", len(aiRequests))
+
+	for idx, req := range aiRequests {
+		log.Printf("  [%d/%d] Scanning request: %s\n", idx+1, len(aiRequests), req.RequestID)
 		// Scan this request
 		findings := util.ScanAIRequest(req, util.SecretConfig)
 		allFindings = append(allFindings, findings...)
 		scannedCount++
+		if len(findings) > 0 {
+			log.Printf("    ⚠️  Found %d secrets\n", len(findings))
+		}
 	}
+
+	log.Printf("✅ Scan complete! Total findings: %d\n", len(allFindings))
 
 	// Group findings by resource
 	scannedResources := groupAllFindings(allFindings)
@@ -221,7 +241,7 @@ func ScanOrgSpaces(c *fiber.Ctx) error {
 }
 
 // Helper function to group findings by resource
-func groupFindingsByResource(findings []models.Finding, aiRequest *models.AI_REQUEST) []models.SCANNED_RESOURCE {
+func groupFindingsByResource(findings []models.Finding, _ *models.AI_REQUEST) []models.SCANNED_RESOURCE {
 	resourceMap := make(map[string]*models.SCANNED_RESOURCE)
 
 	for _, finding := range findings {
@@ -229,11 +249,12 @@ func groupFindingsByResource(findings []models.Finding, aiRequest *models.AI_REQ
 		var resourceType string
 		var resourceID string
 
-		if finding.SourceType == "file" {
+		switch finding.SourceType {
+		case "file":
 			resourceType = "file"
 			resourceID = finding.FileName
 			resourceKey = "file:" + finding.FileName
-		} else if finding.SourceType == "discussion" {
+		case "discussion":
 			resourceType = "discussion"
 			resourceID = finding.DiscussionTitle
 			resourceKey = "discussion:" + finding.DiscussionTitle
@@ -267,11 +288,12 @@ func groupAllFindings(findings []models.Finding) []models.SCANNED_RESOURCE {
 		var resourceType string
 		var resourceID string
 
-		if finding.SourceType == "file" {
+		switch finding.SourceType {
+		case "file":
 			resourceType = "file"
 			resourceID = finding.FileName
 			resourceKey = "file:" + finding.FileName
-		} else if finding.SourceType == "discussion" {
+		case "discussion":
 			resourceType = "discussion"
 			resourceID = finding.DiscussionTitle
 			resourceKey = "discussion:" + finding.DiscussionTitle

@@ -1,10 +1,12 @@
 package util
 
 import (
+	"log"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/MishraShardendu22/Scanner/models"
 )
@@ -137,24 +139,50 @@ func ScanDiscussion(disc models.DISCUSSION, patterns []models.SecretPattern) []m
 
 func ScanAIRequest(req models.AI_REQUEST, patterns []models.SecretPattern) []models.Finding {
 	var wg sync.WaitGroup
-	ch := make(chan []models.Finding)
+	ch := make(chan []models.Finding, 10) // Buffered channel for better performance
 	results := []models.Finding{}
 
-	// Scan siblings/files
+	totalItems := len(req.Siblings) + len(req.Discussions)
+	var scannedCount int32
+
+	log.Printf("  🔍 Scanning %d files and %d discussions...\n", len(req.Siblings), len(req.Discussions))
+
+	// Scan siblings/files with limited concurrency
+	semaphore := make(chan struct{}, 20) // Limit to 20 concurrent scans
+
 	for _, f := range req.Siblings {
 		wg.Add(1)
 		go func(file models.SIBLING) {
 			defer wg.Done()
-			ch <- ScanFile(file, patterns)
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			findings := ScanFile(file, patterns)
+			ch <- findings
+
+			count := atomic.AddInt32(&scannedCount, 1)
+			if len(findings) > 0 {
+				log.Printf("    [%d/%d] ⚠️  %s: Found %d secrets\n", count, totalItems, file.RFilename, len(findings))
+			} else if count%10 == 0 { // Log progress every 10 files
+				log.Printf("    [%d/%d] Scanned...\n", count, totalItems)
+			}
 		}(f)
 	}
-
 
 	for _, d := range req.Discussions {
 		wg.Add(1)
 		go func(disc models.DISCUSSION) {
 			defer wg.Done()
-			ch <- ScanDiscussion(disc, patterns)
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			findings := ScanDiscussion(disc, patterns)
+			ch <- findings
+
+			count := atomic.AddInt32(&scannedCount, 1)
+			if len(findings) > 0 {
+				log.Printf("    [%d/%d] ⚠️  Discussion '%s': Found %d secrets\n", count, totalItems, disc.Title, len(findings))
+			}
 		}(d)
 	}
 

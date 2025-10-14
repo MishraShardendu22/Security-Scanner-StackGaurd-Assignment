@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/MishraShardendu22/Scanner/models"
 	"github.com/MishraShardendu22/Scanner/util"
@@ -13,6 +16,15 @@ import (
 	"github.com/kamva/mgm/v3"
 )
 
+// HTTP client for org operations
+var orgHTTPClient = &http.Client{
+	Timeout: 30 * time.Second,
+	Transport: &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     90 * time.Second,
+	},
+}
 
 func FetchOrgModels(c *fiber.Ctx) error {
 	org := c.Params("org")
@@ -20,8 +32,10 @@ func FetchOrgModels(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusBadRequest, "Organization name is required", nil, "")
 	}
 
+	log.Printf("🏢 Fetching models for organization: %s\n", org)
+
 	url := fmt.Sprintf("https://huggingface.co/api/models?author=%s&full=true", org)
-	resp, err := http.Get(url)
+	resp, err := orgHTTPClient.Get(url)
 	if err != nil {
 		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to fetch models", nil, "")
 	}
@@ -37,30 +51,50 @@ func FetchOrgModels(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to parse response", nil, "")
 	}
 
+	log.Printf("✅ Found %d models\n", len(modelsData))
+
 	includePRs := c.Query("include_prs", "false") == "true"
 	includeDiscussion := c.Query("include_discussion", "false") == "true"
 
-	// Save each model to database
+	// Save each model to database concurrently
 	var savedModels []string
-	for _, modelData := range modelsData {
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	semaphore := make(chan struct{}, 10)
+
+	for idx, modelData := range modelsData {
 		modelID, ok := modelData["id"].(string)
 		if !ok {
 			continue
 		}
 
-		aiModel := &models.AI_Models{
-			BaseAI: models.BaseAI{
-				Org:               org,
-				IncludePRS:        includePRs,
-				IncludeDiscussion: includeDiscussion,
-			},
-			Model_ID: modelID,
-		}
+		wg.Add(1)
+		go func(id string, index int) {
+			defer wg.Done()
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
 
-		if err := mgm.Coll(aiModel).Create(aiModel); err == nil {
-			savedModels = append(savedModels, modelID)
-		}
+			log.Printf("  💾 [%d/%d] Saving model: %s\n", index+1, len(modelsData), id)
+
+			aiModel := &models.AI_Models{
+				BaseAI: models.BaseAI{
+					Org:               org,
+					IncludePRS:        includePRs,
+					IncludeDiscussion: includeDiscussion,
+				},
+				Model_ID: id,
+			}
+
+			if err := mgm.Coll(aiModel).Create(aiModel); err == nil {
+				mu.Lock()
+				savedModels = append(savedModels, id)
+				mu.Unlock()
+			}
+		}(modelID, idx)
 	}
+
+	wg.Wait()
+	log.Printf("✅ Saved %d models to database\n", len(savedModels))
 
 	return util.ResponseAPI(c, fiber.StatusOK, fmt.Sprintf("Fetched %d models for organization %s", len(modelsData), org), map[string]interface{}{
 		"organization": org,
