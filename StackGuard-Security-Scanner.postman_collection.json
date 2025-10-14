@@ -1,0 +1,598 @@
+{
+	"info": {
+		"_postman_id": "stackguard-2025-scanner",
+		"name": "StackGuard Security Scanner - Complete API",
+		"description": "Complete API collection for StackGuard Hugging Face Secret Scanner\n\nThis collection tests all API endpoints including:\n- Main scan endpoint (POST /api/scan)\n- Store scan results (POST /api/store)\n- Fetch results (GET /api/results/:scan_id)\n- Dashboard (GET /api/dashboard)\n- Organization-level scanning\n\nCreated: October 15, 2025",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Core API Endpoints (Assignment Required)",
+			"item": [
+				{
+					"name": "1. Scan Model - Unified Endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has scan_id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('scan_id');",
+									"    pm.environment.set(\"scan_id\", jsonData.data.scan_id);",
+									"    if(jsonData.data.storage_id) {",
+									"        pm.environment.set(\"storage_id\", jsonData.data.storage_id);",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Response has scanned_resources\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('scanned_resources');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"microsoft/phi-2\",\n  \"dataset_id\": null,\n  \"space_id\": null,\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": false,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Main unified scan endpoint as per assignment requirements.\nScans a specific Hugging Face model for secrets."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Scan Dataset - Unified Endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains timestamp\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('timestamp');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": null,\n  \"dataset_id\": \"squad\",\n  \"space_id\": null,\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": false,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan a Hugging Face dataset for potential secrets."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Scan with Discussions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"gpt2\",\n  \"dataset_id\": null,\n  \"space_id\": null,\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": true,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan model including discussions for potential secrets."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Scan with PRs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"bert-base-uncased\",\n  \"dataset_id\": null,\n  \"space_id\": null,\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": false,\n  \"include_prs\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan model including pull requests for secrets."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Store Scan Results",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has status stored\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.status).to.eql('stored');",
+									"});",
+									"",
+									"pm.test(\"Response has scan_id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('scan_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"scan_id\": \"SG-2025-1015-001\",\n  \"scanned_resources\": [\n    {\n      \"type\": \"model\",\n      \"id\": \"test/model-example\",\n      \"findings\": [\n        {\n          \"secret_type\": \"GitHub PAT\",\n          \"pattern\": \"ghp_****\",\n          \"file\": \"config.json\",\n          \"line\": 24,\n          \"secret\": \"ghp_1234567890abcdefghijklmnopqrstuv\"\n        },\n        {\n          \"secret_type\": \"AWS Access Key ID\",\n          \"pattern\": \"AKIA****\",\n          \"file\": \"credentials.txt\",\n          \"line\": 5,\n          \"secret\": \"AKIAIOSFODNN7EXAMPLE\"\n        }\n      ]\n    }\n  ],\n  \"timestamp\": \"2025-10-15T12:30:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/store",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"store"
+							]
+						},
+						"description": "Store scan results endpoint as per assignment requirements.\nStores scan data in MongoDB with metadata."
+					},
+					"response": []
+				},
+				{
+					"name": "6. Get Scan Results by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has scanned_resources\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('scanned_resources');",
+									"});",
+									"",
+									"pm.test(\"Response has total_findings\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('total_findings');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/results/{{storage_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"results",
+								"{{storage_id}}"
+							]
+						},
+						"description": "Fetch results endpoint as per assignment requirements.\nRetrieves stored scan details and contextual metadata by scan_id.\n\nNote: Replace {{storage_id}} with actual MongoDB ObjectID from previous scan."
+					},
+					"response": []
+				},
+				{
+					"name": "7. Get All Results with Pagination",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has pagination info\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('pagination');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/results?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"results"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								}
+							]
+						},
+						"description": "Get all scan results with pagination support."
+					},
+					"response": []
+				},
+				{
+					"name": "8. Dashboard - Aggregated Statistics",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has total_scans\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('total_scans');",
+									"});",
+									"",
+									"pm.test(\"Response has by_resource_type\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('by_resource_type');",
+									"});",
+									"",
+									"pm.test(\"Response has by_secret_type\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('by_secret_type');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dashboard"
+							]
+						},
+						"description": "Dashboard endpoint showing all stored results grouped by resource type and severity.\nProvides comprehensive statistics and recent scans."
+					},
+					"response": []
+				}
+			],
+			"description": "Core API endpoints required by the assignment:\n- POST /api/scan (unified scan)\n- POST /api/store (store results)\n- GET /api/results/:scan_id (fetch results)\n- GET /api/dashboard (dashboard)"
+		},
+		{
+			"name": "Organization-Level Scanning",
+			"item": [
+				{
+					"name": "Scan Organization - All Resources",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has models_scanned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('models_scanned');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": null,\n  \"dataset_id\": null,\n  \"space_id\": null,\n  \"org\": \"microsoft\",\n  \"user\": \"\",\n  \"include_discussions\": false,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan all resources (models, datasets, spaces) for a given organization.\nThis demonstrates organization-level scanning capability."
+					},
+					"response": []
+				},
+				{
+					"name": "Scan User Resources",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": null,\n  \"dataset_id\": null,\n  \"space_id\": null,\n  \"org\": \"\",\n  \"user\": \"openai\",\n  \"include_discussions\": false,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan all resources for a specific user account."
+					},
+					"response": []
+				}
+			],
+			"description": "Organization and user-level scanning endpoints to scan all models/datasets/spaces under a given org or user."
+		},
+		{
+			"name": "Advanced Features",
+			"item": [
+				{
+					"name": "Scan Space",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": null,\n  \"dataset_id\": null,\n  \"space_id\": \"stabilityai/stable-diffusion\",\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": false,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan a Hugging Face Space for potential secrets."
+					},
+					"response": []
+				},
+				{
+					"name": "Comprehensive Scan (All Options)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"meta-llama/Llama-2-7b\",\n  \"dataset_id\": null,\n  \"space_id\": null,\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": true,\n  \"include_prs\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Comprehensive scan including files, discussions, and pull requests."
+					},
+					"response": []
+				}
+			],
+			"description": "Advanced scanning features including spaces and comprehensive scans."
+		},
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "API Test Endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"API is working\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('working');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test"
+							]
+						},
+						"description": "Test endpoint to verify API is running and responding."
+					},
+					"response": []
+				}
+			],
+			"description": "Health check and test endpoints to verify API status."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "scan_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "storage_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
