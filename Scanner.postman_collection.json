@@ -1,0 +1,245 @@
+{
+	"info": {
+		"_postman_id": "4c75cad2-f6f2-4c0d-8493-594f3b4f24cb",
+		"name": "Scanner",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "33549695"
+	},
+	"item": [
+		{
+			"name": "Get_Request",
+			"item": [
+				{
+					"name": "Org-Specific",
+					"item": [
+						{
+							"name": "Get-All-Models-Org",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://huggingface.co/api/datasets?author=microsoft&full=true",
+									"protocol": "https",
+									"host": [
+										"huggingface",
+										"co"
+									],
+									"path": [
+										"api",
+										"datasets"
+									],
+									"query": [
+										{
+											"key": "author",
+											"value": "microsoft"
+										},
+										{
+											"key": "full",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get-All-Datasets-Org",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://huggingface.co/api/datasets?author=microsoft&full=true",
+									"protocol": "https",
+									"host": [
+										"huggingface",
+										"co"
+									],
+									"path": [
+										"api",
+										"datasets"
+									],
+									"query": [
+										{
+											"key": "author",
+											"value": "microsoft"
+										},
+										{
+											"key": "full",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get-All-Space-Org",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://huggingface.co/api/spaces?author=microsoft&full=true",
+									"protocol": "https",
+									"host": [
+										"huggingface",
+										"co"
+									],
+									"path": [
+										"api",
+										"spaces"
+									],
+									"query": [
+										{
+											"key": "author",
+											"value": "microsoft"
+										},
+										{
+											"key": "full",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Get-Model",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Read}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "https://huggingface.co/api/models/meta-llama/Meta-Llama-3-70B-Instruct"
+					},
+					"response": []
+				},
+				{
+					"name": "Get-Datasets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "https://huggingface.co/api/datasets/fka/awesome-chatgpt-prompts"
+					},
+					"response": []
+				},
+				{
+					"name": "Get-Spaces",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "https://huggingface.co/api/spaces/umint/ai"
+					},
+					"response": []
+				},
+				{
+					"name": "Get-Readable-File",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": "https://huggingface.co/inclusionAI/Ling-1T/resolve/main/README.md"
+					},
+					"response": []
+				},
+				{
+					"name": "Get -PR",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://huggingface.co/api/models/meta-llama/Meta-Llama-3-70B-Instruct/discussions?types=pr&status=all",
+							"protocol": "https",
+							"host": [
+								"huggingface",
+								"co"
+							],
+							"path": [
+								"api",
+								"models",
+								"meta-llama",
+								"Meta-Llama-3-70B-Instruct",
+								"discussions"
+							],
+							"query": [
+								{
+									"key": "types",
+									"value": "pr"
+								},
+								{
+									"key": "status",
+									"value": "all"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get - Discussion",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://huggingface.co/api/models/meta-llama/Meta-Llama-3-70B-Instruct/discussions?types=discussions&status=all",
+							"protocol": "https",
+							"host": [
+								"huggingface",
+								"co"
+							],
+							"path": [
+								"api",
+								"models",
+								"meta-llama",
+								"Meta-Llama-3-70B-Instruct",
+								"discussions"
+							],
+							"query": [
+								{
+									"key": "types",
+									"value": "discussions"
+								},
+								{
+									"key": "status",
+									"value": "all"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/MishraShardendu22/Scanner/database"
 	"github.com/MishraShardendu22/Scanner/models"
+	"github.com/MishraShardendu22/Scanner/route"
 	"github.com/MishraShardendu22/Scanner/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -80,7 +81,13 @@ func SetUpRoutes(app *fiber.App, logger *slog.Logger, config *models.Config) {
 		return util.ResponseAPI(c, fiber.StatusOK, "API is working fine", nil, "")
 	})
 
-	// Token management routes (optional - for debugging/monitoring)
+	// Setup fetch routes (individual resources)
+	route.SetupFetchRoutes(app)
+
+	// Setup organization-specific routes
+	route.SetupOrgRoutes(app)
+
+	// TODO: Future enhancement - add token management routes
 	// app.Get("/api/token/current", controller.GetCurrentToken)
 	// app.Post("/api/token/rotate", controller.RotateToken)
 
@@ -121,9 +128,8 @@ func loadConfig() *models.Config {
 		MongoURI:         util.GetEnv("MONGODB_URI", "mongodb+srv://shardendu:some_password@cluster0.0uz8vjv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"),
 	}
 
-	// Initialize token manager with tokens from environment
-	tokenString := util.GetEnv("HUGGING_FACE_API_TOKEN_READ", "token1,token2")
-	util.InitTokenManager(tokenString)
+	// TODO: Future enhancement - implement token manager for multiple tokens
+	// For now, using single token from HUGGING_FACE_API_TOKEN_READ env variable
 
 	return config
 }
