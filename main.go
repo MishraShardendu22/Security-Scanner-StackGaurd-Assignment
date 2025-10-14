@@ -4,14 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
-	"log"
-	"log/slog"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
 	"github.com/MishraShardendu22/Scanner/database"
 	"github.com/MishraShardendu22/Scanner/models"
 	"github.com/MishraShardendu22/Scanner/route"
@@ -21,6 +13,13 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
+	"io"
+	"log"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 var (
@@ -29,18 +28,19 @@ var (
 )
 
 func main() {
-	flag.Parse()
 
+	flag.Parse()
 	fmt.Println("Stack Guard Assignment")
 
 	config := loadConfig()
+
 	if err := database.ConnectDatabase(config.DbName, config.MongoURI); err != nil {
 		log.Fatalf("Database connection failed: %v", err)
 	}
 
 	setupLogger(config)
-	logger := slog.Default()
 
+	logger := slog.Default()
 	logger.Info("Starting Security Scanner",
 		"environment", config.Environment,
 		"port", config.Port,
@@ -48,33 +48,32 @@ func main() {
 	)
 
 	app := fiber.New(fiber.Config{
+
 		AppName:      "Security Scanner",
 		ServerHeader: "Security-Scanner",
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  120 * time.Second,
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
+
 			logger.Error("request error", slog.Group("req",
 				slog.String("method", c.Method()),
 				slog.String("path", c.Path()),
 				slog.String("error", err.Error()),
 			))
-
 			code := fiber.StatusInternalServerError
 			if e, ok := err.(*fiber.Error); ok {
 				code = e.Code
 			}
-
 			return util.ResponseAPI(c, code, err.Error(), nil, "")
 		},
 	})
 
 	setupMiddleware(app, config)
-
-	// Set- up routes
 	SetUpRoutes(app, logger, config)
 
 	go func() {
+
 		logger.Info("Server starting", "port", config.Port)
 		if err := app.Listen(":" + config.Port); err != nil {
 			logger.Error("Server failed to start", "error", err)
@@ -86,29 +85,19 @@ func main() {
 }
 
 func SetUpRoutes(app *fiber.App, logger *slog.Logger, config *models.Config) {
+
 	app.Get("/api/test", func(c *fiber.Ctx) error {
+
 		return util.ResponseAPI(c, fiber.StatusOK, "API is working fine", nil, "")
 	})
-
-	// Setup fetch routes (individual resources)
 	route.SetupFetchRoutes(app)
-
-	// Setup organization-specific routes
 	route.SetupOrgRoutes(app)
-
-	// Setup scan routes (trigger security scans)
 	route.SetupScanRoutes(app)
-
-	// Setup result routes (retrieve scan results and dashboard)
 	route.SetupResultRoutes(app)
-
-	// TODO: Future enhancement - add token management routes
-	// app.Get("/api/token/current", controller.GetCurrentToken)
-	// app.Post("/api/token/rotate", controller.RotateToken)
-
 }
 
 func setupLogger(config *models.Config) {
+
 	var level slog.Level
 	switch config.LogLevel {
 	case "debug":
@@ -124,28 +113,25 @@ func setupLogger(config *models.Config) {
 	}
 
 	opts := &slog.HandlerOptions{
+
 		Level:     level,
 		AddSource: true,
 	}
-
 	var writer io.Writer = os.Stdout
 
-	// If log-to-file flag is set, write to both console and file
 	if *logToFile {
-		// Create logs directory if it doesn't exist
 		if err := os.MkdirAll("logs", 0755); err != nil {
 			log.Printf("Failed to create logs directory: %v", err)
 		} else {
-			// Create log file with timestamp
+
 			timestamp := time.Now().Format("2006-01-02_15-04-05")
 			logFileName := fmt.Sprintf("logs/server_%s.log", timestamp)
-
 			var err error
 			logFile, err = os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 			if err != nil {
 				log.Printf("Failed to open log file: %v", err)
 			} else {
-				// Create multi-writer to write to both console and file
+
 				writer = io.MultiWriter(os.Stdout, logFile)
 				log.SetOutput(writer)
 				fmt.Printf("📝 Logs will be saved to: %s\n", logFileName)
@@ -154,12 +140,15 @@ func setupLogger(config *models.Config) {
 	}
 
 	handler := slog.NewJSONHandler(writer, opts)
+
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
 }
 
 func loadConfig() *models.Config {
+
 	config := &models.Config{
+
 		Port:             util.GetEnv("PORT", "8080"),
 		DbName:           util.GetEnv("DB_NAME", "main"),
 		LogLevel:         util.GetEnv("LOG_LEVEL", "debug"),
@@ -168,26 +157,25 @@ func loadConfig() *models.Config {
 		MongoURI:         util.GetEnv("MONGODB_URI", "mongodb+srv://shardendu:some_password@cluster0.0uz8vjv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"),
 	}
 
-	// TODO: Future enhancement - implement token manager for multiple tokens
-	// For now, using single token from HUGGING_FACE_API_TOKEN_READ env variable
-
 	return config
 }
 
 func setupMiddleware(app *fiber.App, config *models.Config) {
+
 	app.Use(recover.New(recover.Config{
+
 		EnableStackTrace: config.Environment == "development",
 	}))
-
 	app.Use(cors.New(cors.Config{
+
 		AllowOrigins:  config.CorsAllowOrigins,
 		AllowMethods:  "GET,POST,PUT,PATCH,DELETE,OPTIONS",
 		AllowHeaders:  "Origin, Content-Type, Accept, Authorization",
 		ExposeHeaders: "Content-Length",
 		MaxAge:        86400,
 	}))
-
 	app.Use(logger.New(logger.Config{
+
 		Format:     "[${time}] ${status} - ${latency} ${method} ${path}\n",
 		TimeFormat: "2006-01-02 15:04:05",
 		TimeZone:   "Local",
@@ -195,28 +183,26 @@ func setupMiddleware(app *fiber.App, config *models.Config) {
 }
 
 func gracefulShutdown(app *fiber.App, logger *slog.Logger) {
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-
 	<-quit
 	logger.Info("Shutting down server...")
-
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := app.ShutdownWithContext(ctx); err != nil {
 		logger.Error("Server forced to shutdown", "error", err)
 	}
-
 	logger.Info("Server exited")
 
-	// Close log file if it was opened
 	if logFile != nil {
 		logFile.Close()
 	}
 }
 
 func init() {
+
 	currEnv := "development"
 
 	if currEnv == "development" {

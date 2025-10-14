@@ -50,22 +50,18 @@ type SIBLING struct {
 
 type AI_REQUEST struct {
 	mgm.DefaultModel `bson:",inline"`
-	RequestID        string `json:"request_id" bson:"request_id"`
-
-	Siblings    []SIBLING    `json:"siblings" bson:"siblings"`
-	Discussions []DISCUSSION `json:"discussions" bson:"discussions"`
+	RequestID        string       `json:"request_id" bson:"request_id"`
+	Siblings         []SIBLING    `json:"siblings" bson:"siblings"`
+	Discussions      []DISCUSSION `json:"discussions" bson:"discussions"`
 }
 
 type Finding struct {
-	SecretType string `json:"secret_type" bson:"secret_type"`
-	Pattern    string `json:"pattern" bson:"pattern"`
-	Secret     string `json:"secret" bson:"secret"`
-
-	SourceType string `json:"source_type" bson:"source_type"`
-
-	FileName string `json:"file_name,omitempty" bson:"file_name,omitempty"`
-	Line     int    `json:"line,omitempty" bson:"line,omitempty"`
-
+	SecretType      string `json:"secret_type" bson:"secret_type"`
+	Pattern         string `json:"pattern" bson:"pattern"`
+	Secret          string `json:"secret" bson:"secret"`
+	SourceType      string `json:"source_type" bson:"source_type"`
+	FileName        string `json:"file_name,omitempty" bson:"file_name,omitempty"`
+	Line            int    `json:"line,omitempty" bson:"line,omitempty"`
 	DiscussionNum   int64  `json:"discussion_num,omitempty" bson:"discussion_num,omitempty"`
 	DiscussionTitle string `json:"discussion_title,omitempty" bson:"discussion_title,omitempty"`
 	DiscussionRepo  string `json:"discussion_repo,omitempty" bson:"discussion_repo,omitempty"`
@@ -81,4 +77,14 @@ type SCAN_RESULT struct {
 	mgm.DefaultModel `bson:",inline"`
 	RequestID        string             `json:"request_id" bson:"request_id"`
 	ScannedResources []SCANNED_RESOURCE `json:"scanned_resources" bson:"scanned_resources"`
+}
+
+type ScanRequestBody struct {
+	ModelID            string `json:"model_id"`
+	DatasetID          string `json:"dataset_id"`
+	SpaceID            string `json:"space_id"`
+	Org                string `json:"org"`
+	User               string `json:"user"`
+	IncludeDiscussions bool   `json:"include_discussions"`
+	IncludePRs         bool   `json:"include_prs"`
 }
