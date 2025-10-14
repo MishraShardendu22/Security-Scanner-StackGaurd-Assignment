@@ -2,6 +2,7 @@ package controller
 
 import (
 	"log"
+	"sync"
 
 	"github.com/MishraShardendu22/Scanner/models"
 	"github.com/MishraShardendu22/Scanner/util"
@@ -102,16 +103,33 @@ func ScanOrgModels(c *fiber.Ctx) error {
 
 	log.Printf("🔍 Scanning %d requests...\n", len(aiRequests))
 
+	// Parallelize request scanning
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	semaphore := make(chan struct{}, 10) // Limit concurrent scans to avoid overwhelming the system
+
 	for idx, req := range aiRequests {
-		log.Printf("  [%d/%d] Scanning request: %s\n", idx+1, len(aiRequests), req.RequestID)
-		// Scan this request
-		findings := util.ScanAIRequest(req, util.SecretConfig)
-		allFindings = append(allFindings, findings...)
-		scannedCount++
-		if len(findings) > 0 {
-			log.Printf("    ⚠️  Found %d secrets\n", len(findings))
-		}
+		wg.Add(1)
+		go func(r models.AI_REQUEST, index int) {
+			defer wg.Done()
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			log.Printf("  [%d/%d] Scanning request: %s\n", index+1, len(aiRequests), r.RequestID)
+			findings := util.ScanAIRequest(r, util.SecretConfig)
+
+			mu.Lock()
+			allFindings = append(allFindings, findings...)
+			scannedCount++
+			mu.Unlock()
+
+			if len(findings) > 0 {
+				log.Printf("    ⚠️  Found %d secrets\n", len(findings))
+			}
+		}(req, idx)
 	}
+
+	wg.Wait()
 
 	log.Printf("✅ Scan complete! Total findings: %d\n", len(allFindings))
 
@@ -163,11 +181,35 @@ func ScanOrgDatasets(c *fiber.Ctx) error {
 	aiRequests := []models.AI_REQUEST{}
 	mgm.Coll(&models.AI_REQUEST{}).SimpleFind(&aiRequests, bson.M{})
 
-	for _, req := range aiRequests {
-		findings := util.ScanAIRequest(req, util.SecretConfig)
-		allFindings = append(allFindings, findings...)
-		scannedCount++
+	log.Printf("🔍 Scanning %d requests...\n", len(aiRequests))
+
+	// Parallelize request scanning
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	semaphore := make(chan struct{}, 10)
+
+	for idx, req := range aiRequests {
+		wg.Add(1)
+		go func(r models.AI_REQUEST, index int) {
+			defer wg.Done()
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			log.Printf("  [%d/%d] Scanning request: %s\n", index+1, len(aiRequests), r.RequestID)
+			findings := util.ScanAIRequest(r, util.SecretConfig)
+
+			mu.Lock()
+			allFindings = append(allFindings, findings...)
+			scannedCount++
+			mu.Unlock()
+
+			if len(findings) > 0 {
+				log.Printf("    ⚠️  Found %d secrets\n", len(findings))
+			}
+		}(req, idx)
 	}
+
+	wg.Wait()
 
 	scannedResources := groupAllFindings(allFindings)
 
@@ -214,11 +256,35 @@ func ScanOrgSpaces(c *fiber.Ctx) error {
 	aiRequests := []models.AI_REQUEST{}
 	mgm.Coll(&models.AI_REQUEST{}).SimpleFind(&aiRequests, bson.M{})
 
-	for _, req := range aiRequests {
-		findings := util.ScanAIRequest(req, util.SecretConfig)
-		allFindings = append(allFindings, findings...)
-		scannedCount++
+	log.Printf("🔍 Scanning %d requests...\n", len(aiRequests))
+
+	// Parallelize request scanning
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	semaphore := make(chan struct{}, 10)
+
+	for idx, req := range aiRequests {
+		wg.Add(1)
+		go func(r models.AI_REQUEST, index int) {
+			defer wg.Done()
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			log.Printf("  [%d/%d] Scanning request: %s\n", index+1, len(aiRequests), r.RequestID)
+			findings := util.ScanAIRequest(r, util.SecretConfig)
+
+			mu.Lock()
+			allFindings = append(allFindings, findings...)
+			scannedCount++
+			mu.Unlock()
+
+			if len(findings) > 0 {
+				log.Printf("    ⚠️  Found %d secrets\n", len(findings))
+			}
+		}(req, idx)
 	}
+
+	wg.Wait()
 
 	scannedResources := groupAllFindings(allFindings)
 

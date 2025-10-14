@@ -148,7 +148,7 @@ func ScanAIRequest(req models.AI_REQUEST, patterns []models.SecretPattern) []mod
 	log.Printf("  🔍 Scanning %d files and %d discussions...\n", len(req.Siblings), len(req.Discussions))
 
 	// Scan siblings/files with limited concurrency
-	semaphore := make(chan struct{}, 20) // Limit to 20 concurrent scans
+	semaphore := make(chan struct{}, 50) // Increased from 20 to 50 for faster scanning
 
 	for _, f := range req.Siblings {
 		wg.Add(1)

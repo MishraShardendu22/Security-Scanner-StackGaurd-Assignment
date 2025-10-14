@@ -16,13 +16,16 @@ import (
 	"github.com/kamva/mgm/v3"
 )
 
-// HTTP client with connection pooling for better performance
+// HTTP client with optimized connection pooling for maximum performance
 var httpClient = &http.Client{
-	Timeout: 30 * time.Second,
+	Timeout: 45 * time.Second,
 	Transport: &http.Transport{
-		MaxIdleConns:        100,
-		MaxIdleConnsPerHost: 10,
+		MaxIdleConns:        200, // Increased from 100
+		MaxIdleConnsPerHost: 50,  // Increased from 10
+		MaxConnsPerHost:     100, // New: limit max connections per host
 		IdleConnTimeout:     90 * time.Second,
+		DisableKeepAlives:   false,
+		DisableCompression:  false,
 	},
 }
 
@@ -269,7 +272,7 @@ func fetchAndAddToRequest(aiRequest *models.AI_REQUEST, resourceID, resourceType
 
 		var wg sync.WaitGroup
 		var mu sync.Mutex
-		semaphore := make(chan struct{}, 10) // Limit to 10 concurrent requests
+		semaphore := make(chan struct{}, 30) // Increased from 10 to 30 for faster fetching
 
 		for idx, sib := range siblings {
 			if sibMap, ok := sib.(map[string]interface{}); ok {
@@ -470,7 +473,7 @@ func scanOrganization(c *fiber.Ctx, org string, includePRs, includeDiscussions b
 	log.Printf("🔍 Scanning first %d models concurrently...\n", limit)
 
 	var wg sync.WaitGroup
-	semaphore := make(chan struct{}, 3) // Limit to 3 concurrent model scans
+	semaphore := make(chan struct{}, 10) // Increased from 3 to 10 for faster org scanning
 
 	for i := 0; i < limit; i++ {
 		modelData := modelsData[i]

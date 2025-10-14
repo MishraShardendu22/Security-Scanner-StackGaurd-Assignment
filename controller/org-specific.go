@@ -16,13 +16,16 @@ import (
 	"github.com/kamva/mgm/v3"
 )
 
-// HTTP client for org operations
+// HTTP client for org operations with increased limits
 var orgHTTPClient = &http.Client{
-	Timeout: 30 * time.Second,
+	Timeout: 45 * time.Second,
 	Transport: &http.Transport{
-		MaxIdleConns:        100,
-		MaxIdleConnsPerHost: 10,
+		MaxIdleConns:        200, // Increased from 100
+		MaxIdleConnsPerHost: 50,  // Increased from 10
+		MaxConnsPerHost:     100, // New: limit max connections per host
 		IdleConnTimeout:     90 * time.Second,
+		DisableKeepAlives:   false,
+		DisableCompression:  false,
 	},
 }
 
@@ -60,7 +63,7 @@ func FetchOrgModels(c *fiber.Ctx) error {
 	var savedModels []string
 	var mu sync.Mutex
 	var wg sync.WaitGroup
-	semaphore := make(chan struct{}, 10)
+	semaphore := make(chan struct{}, 20) // Increased from 10 to 20
 
 	for idx, modelData := range modelsData {
 		modelID, ok := modelData["id"].(string)
@@ -128,29 +131,50 @@ func FetchOrgDatasets(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to parse response", nil, "")
 	}
 
+	log.Printf("✅ Found %d datasets\n", len(datasetsData))
+
 	includePRs := c.Query("include_prs", "false") == "true"
 	includeDiscussion := c.Query("include_discussion", "false") == "true"
 
+	// Save each dataset to database concurrently
 	var savedDatasets []string
-	for _, datasetData := range datasetsData {
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	semaphore := make(chan struct{}, 20) // Increased concurrency
+
+	for idx, datasetData := range datasetsData {
 		datasetID, ok := datasetData["id"].(string)
 		if !ok {
 			continue
 		}
 
-		aiDataset := &models.AI_DATASETS{
-			BaseAI: models.BaseAI{
-				Org:               org,
-				IncludePRS:        includePRs,
-				IncludeDiscussion: includeDiscussion,
-			},
-			Dataset_ID: datasetID,
-		}
+		wg.Add(1)
+		go func(id string, index int) {
+			defer wg.Done()
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
 
-		if err := mgm.Coll(aiDataset).Create(aiDataset); err == nil {
-			savedDatasets = append(savedDatasets, datasetID)
-		}
+			log.Printf("  💾 [%d/%d] Saving dataset: %s\n", index+1, len(datasetsData), id)
+
+			aiDataset := &models.AI_DATASETS{
+				BaseAI: models.BaseAI{
+					Org:               org,
+					IncludePRS:        includePRs,
+					IncludeDiscussion: includeDiscussion,
+				},
+				Dataset_ID: id,
+			}
+
+			if err := mgm.Coll(aiDataset).Create(aiDataset); err == nil {
+				mu.Lock()
+				savedDatasets = append(savedDatasets, id)
+				mu.Unlock()
+			}
+		}(datasetID, idx)
 	}
+
+	wg.Wait()
+	log.Printf("✅ Saved %d datasets to database\n", len(savedDatasets))
 
 	return util.ResponseAPI(c, fiber.StatusOK, fmt.Sprintf("Fetched %d datasets for organization %s", len(datasetsData), org), map[string]interface{}{
 		"organization": org,
@@ -184,29 +208,50 @@ func FetchOrgSpaces(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to parse response", nil, "")
 	}
 
+	log.Printf("✅ Found %d spaces\n", len(spacesData))
+
 	includePRs := c.Query("include_prs", "false") == "true"
 	includeDiscussion := c.Query("include_discussion", "false") == "true"
 
+	// Save each space to database concurrently
 	var savedSpaces []string
-	for _, spaceData := range spacesData {
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	semaphore := make(chan struct{}, 20) // Increased concurrency
+
+	for idx, spaceData := range spacesData {
 		spaceID, ok := spaceData["id"].(string)
 		if !ok {
 			continue
 		}
 
-		aiSpace := &models.AI_SPACES{
-			BaseAI: models.BaseAI{
-				Org:               org,
-				IncludePRS:        includePRs,
-				IncludeDiscussion: includeDiscussion,
-			},
-			Space_ID: spaceID,
-		}
+		wg.Add(1)
+		go func(id string, index int) {
+			defer wg.Done()
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
 
-		if err := mgm.Coll(aiSpace).Create(aiSpace); err == nil {
-			savedSpaces = append(savedSpaces, spaceID)
-		}
+			log.Printf("  💾 [%d/%d] Saving space: %s\n", index+1, len(spacesData), id)
+
+			aiSpace := &models.AI_SPACES{
+				BaseAI: models.BaseAI{
+					Org:               org,
+					IncludePRS:        includePRs,
+					IncludeDiscussion: includeDiscussion,
+				},
+				Space_ID: id,
+			}
+
+			if err := mgm.Coll(aiSpace).Create(aiSpace); err == nil {
+				mu.Lock()
+				savedSpaces = append(savedSpaces, id)
+				mu.Unlock()
+			}
+		}(spaceID, idx)
 	}
+
+	wg.Wait()
+	log.Printf("✅ Saved %d spaces to database\n", len(savedSpaces))
 
 	return util.ResponseAPI(c, fiber.StatusOK, fmt.Sprintf("Fetched %d spaces for organization %s", len(spacesData), org), map[string]interface{}{
 		"organization": org,

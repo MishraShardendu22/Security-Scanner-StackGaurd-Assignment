@@ -16,13 +16,16 @@ import (
 	"github.com/kamva/mgm/v3"
 )
 
-// HTTP client for better performance
+// HTTP client for better performance with increased limits
 var fetchHTTPClient = &http.Client{
-	Timeout: 30 * time.Second,
+	Timeout: 45 * time.Second,
 	Transport: &http.Transport{
-		MaxIdleConns:        100,
-		MaxIdleConnsPerHost: 10,
+		MaxIdleConns:        200, // Increased from 100
+		MaxIdleConnsPerHost: 50,  // Increased from 10
+		MaxConnsPerHost:     100, // New: limit max connections per host
 		IdleConnTimeout:     90 * time.Second,
+		DisableKeepAlives:   false,
+		DisableCompression:  false,
 	},
 }
 
@@ -73,7 +76,7 @@ func FetchModel(c *fiber.Ctx) error {
 
 		var wg sync.WaitGroup
 		var mu sync.Mutex
-		semaphore := make(chan struct{}, 10)
+		semaphore := make(chan struct{}, 20) // Increased from 10 to 20
 
 		for idx, sib := range siblings {
 			if sibMap, ok := sib.(map[string]interface{}); ok {
@@ -150,26 +153,50 @@ func FetchDataset(c *fiber.Ctx) error {
 	includePRs := c.Query("include_prs", "false") == "true"
 	includeDiscussion := c.Query("include_discussion", "false") == "true"
 
+	log.Printf("🚀 Fetching dataset: %s\n", datasetID)
+
 	aiRequest := &models.AI_REQUEST{
 		RequestID:   uuid.New().String(),
 		Siblings:    []models.SIBLING{},
 		Discussions: []models.DISCUSSION{},
 	}
 
+	// Extract siblings and fetch file content concurrently
 	if siblings, ok := datasetData["siblings"].([]interface{}); ok {
-		for _, sib := range siblings {
+		log.Printf("📂 Found %d files to fetch\n", len(siblings))
+
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+		semaphore := make(chan struct{}, 20) // Increased from sequential
+
+		for idx, sib := range siblings {
 			if sibMap, ok := sib.(map[string]interface{}); ok {
 				if filename, ok := sibMap["rfilename"].(string); ok {
-					sibling := fetchFileContent(datasetID, filename, "datasets")
-					aiRequest.Siblings = append(aiRequest.Siblings, sibling)
+					wg.Add(1)
+					go func(fname string, index int) {
+						defer wg.Done()
+						semaphore <- struct{}{}
+						defer func() { <-semaphore }()
+
+						log.Printf("  📄 [%d/%d] Fetching: %s\n", index+1, len(siblings), fname)
+						sibling := fetchFileContent(datasetID, fname, "datasets")
+
+						mu.Lock()
+						aiRequest.Siblings = append(aiRequest.Siblings, sibling)
+						mu.Unlock()
+					}(filename, idx)
 				}
 			}
 		}
+		wg.Wait()
+		log.Printf("✅ All %d files fetched\n", len(siblings))
 	}
 
 	if includePRs || includeDiscussion {
+		log.Println("💬 Fetching discussions/PRs...")
 		discussions, _ := fetchDiscussions(datasetID, "datasets", includePRs, includeDiscussion)
 		aiRequest.Discussions = discussions
+		log.Printf("✅ Fetched %d discussions/PRs\n", len(discussions))
 	}
 
 	if err := mgm.Coll(aiRequest).Create(aiRequest); err != nil {
@@ -215,26 +242,50 @@ func FetchSpace(c *fiber.Ctx) error {
 	includePRs := c.Query("include_prs", "false") == "true"
 	includeDiscussion := c.Query("include_discussion", "false") == "true"
 
+	log.Printf("🚀 Fetching space: %s\n", spaceID)
+
 	aiRequest := &models.AI_REQUEST{
 		RequestID:   uuid.New().String(),
 		Siblings:    []models.SIBLING{},
 		Discussions: []models.DISCUSSION{},
 	}
 
+	// Extract siblings and fetch file content concurrently
 	if siblings, ok := spaceData["siblings"].([]interface{}); ok {
-		for _, sib := range siblings {
+		log.Printf("📂 Found %d files to fetch\n", len(siblings))
+
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+		semaphore := make(chan struct{}, 20) // Increased from sequential
+
+		for idx, sib := range siblings {
 			if sibMap, ok := sib.(map[string]interface{}); ok {
 				if filename, ok := sibMap["rfilename"].(string); ok {
-					sibling := fetchFileContent(spaceID, filename, "spaces")
-					aiRequest.Siblings = append(aiRequest.Siblings, sibling)
+					wg.Add(1)
+					go func(fname string, index int) {
+						defer wg.Done()
+						semaphore <- struct{}{}
+						defer func() { <-semaphore }()
+
+						log.Printf("  📄 [%d/%d] Fetching: %s\n", index+1, len(siblings), fname)
+						sibling := fetchFileContent(spaceID, fname, "spaces")
+
+						mu.Lock()
+						aiRequest.Siblings = append(aiRequest.Siblings, sibling)
+						mu.Unlock()
+					}(filename, idx)
 				}
 			}
 		}
+		wg.Wait()
+		log.Printf("✅ All %d files fetched\n", len(siblings))
 	}
 
 	if includePRs || includeDiscussion {
+		log.Println("💬 Fetching discussions/PRs...")
 		discussions, _ := fetchDiscussions(spaceID, "spaces", includePRs, includeDiscussion)
 		aiRequest.Discussions = discussions
+		log.Printf("✅ Fetched %d discussions/PRs\n", len(discussions))
 	}
 
 	if err := mgm.Coll(aiRequest).Create(aiRequest); err != nil {
@@ -249,22 +300,37 @@ func FetchSpace(c *fiber.Ctx) error {
 	}, "")
 }
 
-// Helper function to fetch discussions and PRs
+// Helper function to fetch discussions and PRs in parallel
 func fetchDiscussions(id, resourceType string, includePRs, includeDiscussion bool) ([]models.DISCUSSION, error) {
 	var discussions []models.DISCUSSION
+	var mu sync.Mutex
+	var wg sync.WaitGroup
 
 	if includePRs {
-		url := fmt.Sprintf("https://huggingface.co/api/%s/%s/discussions?types=pr&status=all", resourceType, id)
-		prs, _ := getDiscussionsFromURL(url)
-		discussions = append(discussions, prs...)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			url := fmt.Sprintf("https://huggingface.co/api/%s/%s/discussions?types=pr&status=all", resourceType, id)
+			prs, _ := getDiscussionsFromURL(url)
+			mu.Lock()
+			discussions = append(discussions, prs...)
+			mu.Unlock()
+		}()
 	}
 
 	if includeDiscussion {
-		url := fmt.Sprintf("https://huggingface.co/api/%s/%s/discussions?types=discussion&status=all", resourceType, id)
-		discs, _ := getDiscussionsFromURL(url)
-		discussions = append(discussions, discs...)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			url := fmt.Sprintf("https://huggingface.co/api/%s/%s/discussions?types=discussion&status=all", resourceType, id)
+			discs, _ := getDiscussionsFromURL(url)
+			mu.Lock()
+			discussions = append(discussions, discs...)
+			mu.Unlock()
+		}()
 	}
 
+	wg.Wait()
 	return discussions, nil
 }
 
