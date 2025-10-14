@@ -52,12 +52,13 @@ func FetchModel(c *fiber.Ctx) error {
 		Discussions: []models.DISCUSSION{},
 	}
 
-	// Extract siblings
+	// Extract siblings and fetch file content
 	if siblings, ok := modelData["siblings"].([]interface{}); ok {
 		for _, sib := range siblings {
 			if sibMap, ok := sib.(map[string]interface{}); ok {
 				if filename, ok := sibMap["rfilename"].(string); ok {
-					aiRequest.Siblings = append(aiRequest.Siblings, models.SIBLING{RFilename: filename})
+					sibling := fetchFileContent(modelID, filename, "models")
+					aiRequest.Siblings = append(aiRequest.Siblings, sibling)
 				}
 			}
 		}
@@ -123,7 +124,8 @@ func FetchDataset(c *fiber.Ctx) error {
 		for _, sib := range siblings {
 			if sibMap, ok := sib.(map[string]interface{}); ok {
 				if filename, ok := sibMap["rfilename"].(string); ok {
-					aiRequest.Siblings = append(aiRequest.Siblings, models.SIBLING{RFilename: filename})
+					sibling := fetchFileContent(datasetID, filename, "datasets")
+					aiRequest.Siblings = append(aiRequest.Siblings, sibling)
 				}
 			}
 		}
@@ -187,7 +189,8 @@ func FetchSpace(c *fiber.Ctx) error {
 		for _, sib := range siblings {
 			if sibMap, ok := sib.(map[string]interface{}); ok {
 				if filename, ok := sibMap["rfilename"].(string); ok {
-					aiRequest.Siblings = append(aiRequest.Siblings, models.SIBLING{RFilename: filename})
+					sibling := fetchFileContent(spaceID, filename, "spaces")
+					aiRequest.Siblings = append(aiRequest.Siblings, sibling)
 				}
 			}
 		}
@@ -227,6 +230,35 @@ func fetchDiscussions(id, resourceType string, includePRs, includeDiscussion boo
 	}
 
 	return discussions, nil
+}
+
+// Helper function to fetch file content from HuggingFace
+func fetchFileContent(resourceID, filename, resourceType string) models.SIBLING {
+	sibling := models.SIBLING{
+		RFilename:   filename,
+		FileContent: "",
+	}
+
+	// Construct the file URL: https://huggingface.co/{org}/{name}/resolve/main/{filename}
+	fileURL := fmt.Sprintf("https://huggingface.co/%s/resolve/main/%s", resourceID, filename)
+
+	resp, err := http.Get(fileURL)
+	if err != nil {
+		return sibling
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return sibling
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return sibling
+	}
+
+	sibling.FileContent = string(body)
+	return sibling
 }
 
 func getDiscussionsFromURL(url string) ([]models.DISCUSSION, error) {

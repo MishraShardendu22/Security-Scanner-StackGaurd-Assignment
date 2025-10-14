@@ -1,6 +1,13 @@
 package util
 
-import "github.com/MishraShardendu22/Scanner/models"
+import (
+	"path/filepath"
+	"regexp"
+	"strings"
+	"sync"
+
+	"github.com/MishraShardendu22/Scanner/models"
+)
 
 var SecretConfig = []models.SecretPattern{
 	// API / Access Tokens
@@ -51,28 +58,114 @@ var SecretConfig = []models.SecretPattern{
 }
 
 var TextExtensions = map[string]bool{
-    // Code
-    ".py": true, ".js": true, ".jsx": true, ".ts": true, ".tsx": true,
-    ".java": true, ".cpp": true, ".c": true, ".h": true, ".cs": true,
-    ".go": true, ".rs": true, ".rb": true, ".php": true, ".mjs": true,
-    ".sh": true, ".bash": true, ".zsh": true,
+	// Code
+	".py": true, ".js": true, ".jsx": true, ".ts": true, ".tsx": true,
+	".java": true, ".cpp": true, ".c": true, ".h": true, ".cs": true,
+	".go": true, ".rs": true, ".rb": true, ".php": true, ".mjs": true,
+	".sh": true, ".bash": true, ".zsh": true,
 
-    // Web / Frontend
-    ".html": true, ".htm": true, ".ejs": true, ".vue": true,
-    ".css": true, ".scss": true, ".sass": true, ".less": true,
+	// Web / Frontend
+	".html": true, ".htm": true, ".ejs": true, ".vue": true,
+	".css": true, ".scss": true, ".sass": true, ".less": true,
 
-    // Config / Data
-    ".json": true, ".yaml": true, ".yml": true, ".toml": true,
-    ".ini": true, ".cfg": true, ".conf": true, ".env": true,
-    ".env.example": true, ".lock": true, ".properties": true,
-    ".dockerfile": true, ".gitignore": true, ".gitattributes": true,
-    ".env.local": true, ".env.dev": true, ".env.prod": true, ".env.test": true,
-    ".secrets": true, ".key": true, ".pem": true, ".crt": true, ".p12": true,
-    ".jks": true, ".kdb": true, ".pub": true, ".asc": true,
-    ".ini.local": true, ".yml.local": true, ".yaml.local": true,
-    ".docker-compose": true, ".docker-compose.yml": true,
+	// Config / Data
+	".json": true, ".yaml": true, ".yml": true, ".toml": true,
+	".ini": true, ".cfg": true, ".conf": true, ".env": true,
+	".env.example": true, ".lock": true, ".properties": true,
+	".dockerfile": true, ".gitignore": true, ".gitattributes": true,
+	".env.local": true, ".env.dev": true, ".env.prod": true, ".env.test": true,
+	".secrets": true, ".key": true, ".pem": true, ".crt": true, ".p12": true,
+	".jks": true, ".kdb": true, ".pub": true, ".asc": true,
+	".ini.local": true, ".yml.local": true, ".yaml.local": true,
+	".docker-compose": true, ".docker-compose.yml": true,
 
-    // Docs / Text
-    ".md": true, ".mdx": true, ".rst": true, ".txt": true, ".log": true,
-    ".csv": true, ".tsv": true, ".ipynb": true,
+	// Docs / Text
+	".md": true, ".mdx": true, ".rst": true, ".txt": true, ".log": true,
+	".csv": true, ".tsv": true, ".ipynb": true,
+}
+
+func ScanFile(file models.SIBLING, patterns []models.SecretPattern) []models.Finding {
+	ext := strings.ToLower(filepath.Ext(file.RFilename))
+	if !TextExtensions[ext] {
+		return nil
+	}
+
+	var findings []models.Finding
+	lines := strings.Split(file.FileContent, "\n")
+
+	for i, line := range lines {
+		for _, pattern := range patterns {
+			re := regexp.MustCompile(pattern.Regex)
+			matches := re.FindAllString(line, -1)
+			for _, match := range matches {
+				findings = append(findings, models.Finding{
+					SecretType: pattern.Name,
+					Pattern:    pattern.Regex,
+					Secret:     match,
+					SourceType: "file",
+					FileName:   file.RFilename,
+					Line:       i + 1,
+				})
+			}
+		}
+	}
+	return findings
+}
+
+func ScanDiscussion(disc models.DISCUSSION, patterns []models.SecretPattern) []models.Finding {
+	var findings []models.Finding
+
+	text := disc.Title + " " + disc.RepoName
+
+	for _, pattern := range patterns {
+		re := regexp.MustCompile(pattern.Regex)
+		matches := re.FindAllString(text, -1)
+		for _, match := range matches {
+			findings = append(findings, models.Finding{
+				SecretType:      pattern.Name,
+				Pattern:         pattern.Regex,
+				Secret:          match,
+				SourceType:      "discussion",
+				DiscussionNum:   disc.Num,
+				DiscussionTitle: disc.Title,
+				DiscussionRepo:  disc.RepoName,
+			})
+		}
+	}
+	return findings
+}
+
+func ScanAIRequest(req models.AI_REQUEST, patterns []models.SecretPattern) []models.Finding {
+	var wg sync.WaitGroup
+	ch := make(chan []models.Finding)
+	results := []models.Finding{}
+
+	// Scan siblings/files
+	for _, f := range req.Siblings {
+		wg.Add(1)
+		go func(file models.SIBLING) {
+			defer wg.Done()
+			ch <- ScanFile(file, patterns)
+		}(f)
+	}
+
+
+	for _, d := range req.Discussions {
+		wg.Add(1)
+		go func(disc models.DISCUSSION) {
+			defer wg.Done()
+			ch <- ScanDiscussion(disc, patterns)
+		}(d)
+	}
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	for f := range ch {
+		results = append(results, f...)
+	}
+
+	return results
 }
