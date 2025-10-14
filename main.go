@@ -76,10 +76,13 @@ func main() {
 }
 
 func SetUpRoutes(app *fiber.App, logger *slog.Logger, config *models.Config) {
-	app.Get("/api/test", func (c *fiber.Ctx) error {
+	app.Get("/api/test", func(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusOK, "API is working fine", nil, "")
 	})
 
+	// Token management routes (optional - for debugging/monitoring)
+	// app.Get("/api/token/current", controller.GetCurrentToken)
+	// app.Post("/api/token/rotate", controller.RotateToken)
 
 }
 
@@ -117,6 +120,11 @@ func loadConfig() *models.Config {
 		Environment:      util.GetEnv("ENVIRONMENT", "development"),
 		MongoURI:         util.GetEnv("MONGODB_URI", "mongodb+srv://shardendu:some_password@cluster0.0uz8vjv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"),
 	}
+
+	// Initialize token manager with tokens from environment
+	tokenString := util.GetEnv("HUGGING_FACE_API_TOKEN_READ", "token1,token2")
+	util.InitTokenManager(tokenString)
+
 	return config
 }
 
