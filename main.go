@@ -1,9 +1,168 @@
 package main
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+	"log"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/MishraShardendu22/Scanner/database"
+	"github.com/MishraShardendu22/Scanner/models"
+	"github.com/MishraShardendu22/Scanner/util"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/joho/godotenv"
+)
 
 func main() {
 	fmt.Println("Stack Guard Assignment")
 
-	
+	config := loadConfig()
+	if err := database.ConnectDatabase(config.DbName, config.MongoURI); err != nil {
+		log.Fatalf("Database connection failed: %v", err)
+	}
+
+	setupLogger(config)
+	logger := slog.Default()
+
+	logger.Info("Starting Security Scanner",
+		"environment", config.Environment,
+		"port", config.Port,
+		"log_level", config.LogLevel,
+	)
+
+	app := fiber.New(fiber.Config{
+		AppName:      "Security Scanner",
+		ServerHeader: "Security-Scanner",
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			logger.Error("request error", slog.Group("req",
+				slog.String("method", c.Method()),
+				slog.String("path", c.Path()),
+				slog.String("error", err.Error()),
+			))
+
+			code := fiber.StatusInternalServerError
+			if e, ok := err.(*fiber.Error); ok {
+				code = e.Code
+			}
+
+			return util.ResponseAPI(c, code, err.Error(), nil, "")
+		},
+	})
+
+	setupMiddleware(app, config)
+
+	// Set- up routes
+	SetUpRoutes(app, logger, config)
+
+	go func() {
+		logger.Info("Server starting", "port", config.Port)
+		if err := app.Listen(":" + config.Port); err != nil {
+			logger.Error("Server failed to start", "error", err)
+			os.Exit(1)
+		}
+	}()
+
+	gracefulShutdown(app, logger)
+}
+
+func SetUpRoutes(app *fiber.App, logger *slog.Logger, config *models.Config) {
+	app.Get("/api/test", func (c *fiber.Ctx) error {
+		return util.ResponseAPI(c, fiber.StatusOK, "API is working fine", nil, "")
+	})
+
+
+}
+
+func setupLogger(config *models.Config) {
+	var level slog.Level
+	switch config.LogLevel {
+	case "debug":
+		level = slog.LevelDebug
+	case "info":
+		level = slog.LevelInfo
+	case "warn":
+		level = slog.LevelWarn
+	case "error":
+		level = slog.LevelError
+	default:
+		level = slog.LevelInfo
+	}
+
+	opts := &slog.HandlerOptions{
+		Level:     level,
+		AddSource: true,
+	}
+
+	handler := slog.NewJSONHandler(os.Stdout, opts)
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
+}
+
+func loadConfig() *models.Config {
+	config := &models.Config{
+		Port:             util.GetEnv("PORT", "8080"),
+		DbName:           util.GetEnv("DB_NAME", "main"),
+		LogLevel:         util.GetEnv("LOG_LEVEL", "debug"),
+		CorsAllowOrigins: util.GetEnv("CORS_ALLOW_ORIGINS", ""),
+		Environment:      util.GetEnv("ENVIRONMENT", "development"),
+		MongoURI:         util.GetEnv("MONGODB_URI", "mongodb+srv://shardendu:some_password@cluster0.0uz8vjv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"),
+	}
+	return config
+}
+
+func setupMiddleware(app *fiber.App, config *models.Config) {
+	app.Use(recover.New(recover.Config{
+		EnableStackTrace: config.Environment == "development",
+	}))
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:  config.CorsAllowOrigins,
+		AllowMethods:  "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+		AllowHeaders:  "Origin, Content-Type, Accept, Authorization",
+		ExposeHeaders: "Content-Length",
+		MaxAge:        86400,
+	}))
+
+	app.Use(logger.New(logger.Config{
+		Format:     "[${time}] ${status} - ${latency} ${method} ${path}\n",
+		TimeFormat: "2006-01-02 15:04:05",
+		TimeZone:   "Local",
+	}))
+}
+
+func gracefulShutdown(app *fiber.App, logger *slog.Logger) {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	<-quit
+	logger.Info("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := app.ShutdownWithContext(ctx); err != nil {
+		logger.Error("Server forced to shutdown", "error", err)
+	}
+
+	logger.Info("Server exited")
+}
+
+func init() {
+	currEnv := "development"
+
+	if currEnv == "development" {
+		if err := godotenv.Load(); err != nil {
+			log.Printf("Warning: error loading .env file: %v", err)
+		}
+	}
 }
