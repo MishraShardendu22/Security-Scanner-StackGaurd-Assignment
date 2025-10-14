@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
+	"io"
 	"log"
 	"log/slog"
 	"os"
@@ -21,7 +23,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var (
+	logToFile = flag.Bool("log-to-file", false, "Save all logs to files in the logs/ directory")
+	logFile   *os.File
+)
+
 func main() {
+	flag.Parse()
+
 	fmt.Println("Stack Guard Assignment")
 
 	config := loadConfig()
@@ -119,7 +128,32 @@ func setupLogger(config *models.Config) {
 		AddSource: true,
 	}
 
-	handler := slog.NewJSONHandler(os.Stdout, opts)
+	var writer io.Writer = os.Stdout
+
+	// If log-to-file flag is set, write to both console and file
+	if *logToFile {
+		// Create logs directory if it doesn't exist
+		if err := os.MkdirAll("logs", 0755); err != nil {
+			log.Printf("Failed to create logs directory: %v", err)
+		} else {
+			// Create log file with timestamp
+			timestamp := time.Now().Format("2006-01-02_15-04-05")
+			logFileName := fmt.Sprintf("logs/server_%s.log", timestamp)
+
+			var err error
+			logFile, err = os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+			if err != nil {
+				log.Printf("Failed to open log file: %v", err)
+			} else {
+				// Create multi-writer to write to both console and file
+				writer = io.MultiWriter(os.Stdout, logFile)
+				log.SetOutput(writer)
+				fmt.Printf("📝 Logs will be saved to: %s\n", logFileName)
+			}
+		}
+	}
+
+	handler := slog.NewJSONHandler(writer, opts)
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
 }
@@ -175,6 +209,11 @@ func gracefulShutdown(app *fiber.App, logger *slog.Logger) {
 	}
 
 	logger.Info("Server exited")
+
+	// Close log file if it was opened
+	if logFile != nil {
+		logFile.Close()
+	}
 }
 
 func init() {
