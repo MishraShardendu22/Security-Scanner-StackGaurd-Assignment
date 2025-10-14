@@ -13,7 +13,7 @@ import (
 	"github.com/kamva/mgm/v3"
 )
 
-// FetchOrgModels fetches all models for an organization
+
 func FetchOrgModels(c *fiber.Ctx) error {
 	org := c.Params("org")
 	if org == "" {

@@ -87,6 +87,12 @@ func SetUpRoutes(app *fiber.App, logger *slog.Logger, config *models.Config) {
 	// Setup organization-specific routes
 	route.SetupOrgRoutes(app)
 
+	// Setup scan routes (trigger security scans)
+	route.SetupScanRoutes(app)
+
+	// Setup result routes (retrieve scan results and dashboard)
+	route.SetupResultRoutes(app)
+
 	// TODO: Future enhancement - add token management routes
 	// app.Get("/api/token/current", controller.GetCurrentToken)
 	// app.Post("/api/token/rotate", controller.RotateToken)
