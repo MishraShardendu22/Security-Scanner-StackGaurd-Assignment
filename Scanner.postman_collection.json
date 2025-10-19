@@ -1,182 +1,844 @@
 {
 	"info": {
-		"_postman_id": "4c75cad2-f6f2-4c0d-8493-594f3b4f24cb",
-		"name": "Scanner",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_postman_id": "stackguard-security-scanner-2025",
+		"name": "StackGuard Security Scanner - Updated API Collection",
+		"description": "Complete API collection for StackGuard Hugging Face Security Scanner\n\nUpdated: October 19, 2025\n\nThis collection includes:\n- Core Scanning Endpoints (POST /api/scan, POST /api/store)\n- Results & Dashboard (GET /api/results, GET /api/dashboard)\n- Fetch Resources (GET /api/model/:id, GET /api/dataset/:id, GET /api/space/:id)\n- Organization Endpoints (GET /api/org/:org/models, datasets, spaces)\n- Scan by Request ID (POST /api/scan/:request_id)\n- Scan by Organization (POST /api/scan/org/:org/models, datasets, spaces)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "33549695"
 	},
 	"item": [
 		{
-			"name": "Get_Request",
+			"name": "Core Scanning APIs",
 			"item": [
 				{
-					"name": "Org-Specific",
-					"item": [
+					"name": "1. Unified Scan - Model",
+					"event": [
 						{
-							"name": "Get-All-Models-Org",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "https://huggingface.co/api/datasets?author=microsoft&full=true",
-									"protocol": "https",
-									"host": [
-										"huggingface",
-										"co"
-									],
-									"path": [
-										"api",
-										"datasets"
-									],
-									"query": [
-										{
-											"key": "author",
-											"value": "microsoft"
-										},
-										{
-											"key": "full",
-											"value": "true"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Get-All-Datasets-Org",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "https://huggingface.co/api/datasets?author=microsoft&full=true",
-									"protocol": "https",
-									"host": [
-										"huggingface",
-										"co"
-									],
-									"path": [
-										"api",
-										"datasets"
-									],
-									"query": [
-										{
-											"key": "author",
-											"value": "microsoft"
-										},
-										{
-											"key": "full",
-											"value": "true"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Get-All-Space-Org",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "https://huggingface.co/api/spaces?author=microsoft&full=true",
-									"protocol": "https",
-									"host": [
-										"huggingface",
-										"co"
-									],
-									"path": [
-										"api",
-										"spaces"
-									],
-									"query": [
-										{
-											"key": "author",
-											"value": "microsoft"
-										},
-										{
-											"key": "full",
-											"value": "true"
-										}
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Get-Model",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{Read}}"
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has scan_id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('scan_id');",
+									"    pm.environment.set(\"scan_id\", jsonData.data.scan_id);",
+									"});",
+									"",
+									"pm.test(\"Response has storage_id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if(jsonData.data.storage_id) {",
+									"        pm.environment.set(\"storage_id\", jsonData.data.storage_id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
 							}
-						},
-						"method": "GET",
-						"header": [],
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
+							"raw": "{\n  \"model_id\": \"microsoft/phi-2\",\n  \"dataset_id\": \"\",\n  \"space_id\": \"\",\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": false,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Main unified scan endpoint. Scans a specific Hugging Face model for secrets."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Unified Scan - Dataset",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
 							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"\",\n  \"dataset_id\": \"squad\",\n  \"space_id\": \"\",\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": false,\n  \"include_prs\": false\n}"
 						},
-						"url": "https://huggingface.co/api/models/meta-llama/Meta-Llama-3-70B-Instruct"
-					},
-					"response": []
-				},
-				{
-					"name": "Get-Datasets",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": "https://huggingface.co/api/datasets/fka/awesome-chatgpt-prompts"
-					},
-					"response": []
-				},
-				{
-					"name": "Get-Spaces",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": "https://huggingface.co/api/spaces/umint/ai"
-					},
-					"response": []
-				},
-				{
-					"name": "Get-Readable-File",
-					"request": {
-						"auth": {
-							"type": "noauth"
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
 						},
-						"method": "GET",
-						"header": [],
-						"url": "https://huggingface.co/inclusionAI/Ling-1T/resolve/main/README.md"
+						"description": "Scan a Hugging Face dataset for potential secrets."
 					},
 					"response": []
 				},
 				{
-					"name": "Get -PR",
+					"name": "3. Unified Scan - Space",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"\",\n  \"dataset_id\": \"\",\n  \"space_id\": \"stabilityai/stable-diffusion\",\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": false,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan a Hugging Face Space for potential secrets."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Scan with Discussions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"gpt2\",\n  \"dataset_id\": \"\",\n  \"space_id\": \"\",\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": true,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan model including discussions for potential secrets."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Scan with PRs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"bert-base-uncased\",\n  \"dataset_id\": \"\",\n  \"space_id\": \"\",\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": false,\n  \"include_prs\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan model including pull requests for secrets."
+					},
+					"response": []
+				},
+				{
+					"name": "6. Comprehensive Scan (All Options)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"meta-llama/Llama-2-7b\",\n  \"dataset_id\": \"\",\n  \"space_id\": \"\",\n  \"org\": \"\",\n  \"user\": \"\",\n  \"include_discussions\": true,\n  \"include_prs\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Comprehensive scan including files, discussions, and pull requests."
+					},
+					"response": []
+				},
+				{
+					"name": "7. Store Scan Results",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has scan_id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('scan_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"scan_id\": \"SG-2025-1019-001\",\n  \"scanned_resources\": [\n    {\n      \"type\": \"model\",\n      \"id\": \"test/model-example\",\n      \"findings\": [\n        {\n          \"secret_type\": \"GitHub PAT\",\n          \"pattern\": \"ghp_****\",\n          \"file_name\": \"config.json\",\n          \"line\": 24,\n          \"secret\": \"ghp_1234567890abcdefghijklmnopqrstuv\",\n          \"source_type\": \"file\"\n        },\n        {\n          \"secret_type\": \"AWS Access Key ID\",\n          \"pattern\": \"AKIA****\",\n          \"file_name\": \"credentials.txt\",\n          \"line\": 5,\n          \"secret\": \"AKIAIOSFODNN7EXAMPLE\",\n          \"source_type\": \"file\"\n        }\n      ]\n    }\n  ],\n  \"timestamp\": \"2025-10-19T12:30:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/store",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"store"
+							]
+						},
+						"description": "Store scan results endpoint. Stores scan data in MongoDB with metadata."
+					},
+					"response": []
+				}
+			],
+			"description": "Core scanning endpoints for unified scanning and storing results"
+		},
+		{
+			"name": "Results & Dashboard",
+			"item": [
+				{
+					"name": "Get Scan Results by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has scanned_resources\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('scanned_resources');",
+									"});",
+									"",
+									"pm.test(\"Response has total_findings\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('total_findings');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://huggingface.co/api/models/meta-llama/Meta-Llama-3-70B-Instruct/discussions?types=pr&status=all",
+							"raw": "{{base_url}}/api/results/{{storage_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"results",
+								"{{storage_id}}"
+							]
+						},
+						"description": "Fetch scan results by MongoDB ObjectID. Replace {{storage_id}} with actual ID from scan response."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Results",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/results",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"results"
+							]
+						},
+						"description": "Get all scan results from database."
+					},
+					"response": []
+				},
+				{
+					"name": "Dashboard - Aggregated Statistics",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has total_scans\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('total_scans');",
+									"});",
+									"",
+									"pm.test(\"Response has by_resource_type\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('by_resource_type');",
+									"});",
+									"",
+									"pm.test(\"Response has by_secret_type\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('by_secret_type');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dashboard"
+							]
+						},
+						"description": "Dashboard endpoint showing aggregated statistics, grouped by resource type and severity."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for retrieving scan results and dashboard statistics"
+		},
+		{
+			"name": "Fetch Resources",
+			"item": [
+				{
+					"name": "Fetch Model by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/model/microsoft/phi-2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"model",
+								"microsoft",
+								"phi-2"
+							]
+						},
+						"description": "Fetch model metadata from Hugging Face API."
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Dataset by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dataset/squad",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dataset",
+								"squad"
+							]
+						},
+						"description": "Fetch dataset metadata from Hugging Face API."
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Space by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/space/stabilityai/stable-diffusion",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"space",
+								"stabilityai",
+								"stable-diffusion"
+							]
+						},
+						"description": "Fetch space metadata from Hugging Face API."
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch PRs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/models/microsoft/phi-2/prs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"models",
+								"microsoft",
+								"phi-2",
+								"prs"
+							]
+						},
+						"description": "Fetch pull requests for a model/dataset/space. Replace 'models' with 'datasets' or 'spaces' as needed."
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Discussions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/models/microsoft/phi-2/discussions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"models",
+								"microsoft",
+								"phi-2",
+								"discussions"
+							]
+						},
+						"description": "Fetch discussions for a model/dataset/space. Replace 'models' with 'datasets' or 'spaces' as needed."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for fetching resource metadata from Hugging Face"
+		},
+		{
+			"name": "Organization Level",
+			"item": [
+				{
+					"name": "Scan Organization - All Resources",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"\",\n  \"dataset_id\": \"\",\n  \"space_id\": \"\",\n  \"org\": \"microsoft\",\n  \"user\": \"\",\n  \"include_discussions\": false,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan all resources (models, datasets, spaces) for an organization."
+					},
+					"response": []
+				},
+				{
+					"name": "Scan User Resources",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model_id\": \"\",\n  \"dataset_id\": \"\",\n  \"space_id\": \"\",\n  \"org\": \"\",\n  \"user\": \"openai\",\n  \"include_discussions\": false,\n  \"include_prs\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan"
+							]
+						},
+						"description": "Scan all resources for a specific user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Org Models",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/org/microsoft/models",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"org",
+								"microsoft",
+								"models"
+							]
+						},
+						"description": "Fetch all models for an organization from Hugging Face."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Org Datasets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/org/microsoft/datasets",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"org",
+								"microsoft",
+								"datasets"
+							]
+						},
+						"description": "Fetch all datasets for an organization from Hugging Face."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Org Spaces",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/org/microsoft/spaces",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"org",
+								"microsoft",
+								"spaces"
+							]
+						},
+						"description": "Fetch all spaces for an organization from Hugging Face."
+					},
+					"response": []
+				}
+			],
+			"description": "Organization and user-level endpoints"
+		},
+		{
+			"name": "Advanced Scan Endpoints",
+			"item": [
+				{
+					"name": "Scan by Request ID",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/scan/:request_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan",
+								":request_id"
+							],
+							"variable": [
+								{
+									"key": "request_id",
+									"value": "your-request-id-here"
+								}
+							]
+						},
+						"description": "Scan an existing AI_REQUEST by its request_id from database."
+					},
+					"response": []
+				},
+				{
+					"name": "Scan by MongoDB ID",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/scan/by-id/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan",
+								"by-id",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "mongodb-object-id-here"
+								}
+							]
+						},
+						"description": "Scan an existing AI_REQUEST by its MongoDB ObjectID."
+					},
+					"response": []
+				},
+				{
+					"name": "Scan Org Models Only",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/scan/org/:org/models",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan",
+								"org",
+								":org",
+								"models"
+							],
+							"variable": [
+								{
+									"key": "org",
+									"value": "microsoft"
+								}
+							]
+						},
+						"description": "Scan only models for a specific organization."
+					},
+					"response": []
+				},
+				{
+					"name": "Scan Org Datasets Only",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/scan/org/:org/datasets",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan",
+								"org",
+								":org",
+								"datasets"
+							],
+							"variable": [
+								{
+									"key": "org",
+									"value": "microsoft"
+								}
+							]
+						},
+						"description": "Scan only datasets for a specific organization."
+					},
+					"response": []
+				},
+				{
+					"name": "Scan Org Spaces Only",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/scan/org/:org/spaces",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"scan",
+								"org",
+								":org",
+								"spaces"
+							],
+							"variable": [
+								{
+									"key": "org",
+									"value": "microsoft"
+								}
+							]
+						},
+						"description": "Scan only spaces for a specific organization."
+					},
+					"response": []
+				}
+			],
+			"description": "Advanced scanning endpoints for specific use cases"
+		},
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "API Test Endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"API is working\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('working');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test"
+							]
+						},
+						"description": "Test endpoint to verify API is running and responding."
+					},
+					"response": []
+				}
+			],
+			"description": "Health check endpoints"
+		},
+		{
+			"name": "External HuggingFace APIs (Reference)",
+			"item": [
+				{
+					"name": "HF - Get Model Direct",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://huggingface.co/api/models/microsoft/phi-2",
 							"protocol": "https",
 							"host": [
 								"huggingface",
@@ -185,8 +847,124 @@
 							"path": [
 								"api",
 								"models",
-								"meta-llama",
-								"Meta-Llama-3-70B-Instruct",
+								"microsoft",
+								"phi-2"
+							]
+						},
+						"description": "Direct HuggingFace API call for reference."
+					},
+					"response": []
+				},
+				{
+					"name": "HF - Get Org Models",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://huggingface.co/api/models?author=microsoft&full=true",
+							"protocol": "https",
+							"host": [
+								"huggingface",
+								"co"
+							],
+							"path": [
+								"api",
+								"models"
+							],
+							"query": [
+								{
+									"key": "author",
+									"value": "microsoft"
+								},
+								{
+									"key": "full",
+									"value": "true"
+								}
+							]
+						},
+						"description": "Get all models for an organization directly from HuggingFace."
+					},
+					"response": []
+				},
+				{
+					"name": "HF - Get Org Datasets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://huggingface.co/api/datasets?author=microsoft&full=true",
+							"protocol": "https",
+							"host": [
+								"huggingface",
+								"co"
+							],
+							"path": [
+								"api",
+								"datasets"
+							],
+							"query": [
+								{
+									"key": "author",
+									"value": "microsoft"
+								},
+								{
+									"key": "full",
+									"value": "true"
+								}
+							]
+						},
+						"description": "Get all datasets for an organization directly from HuggingFace."
+					},
+					"response": []
+				},
+				{
+					"name": "HF - Get Org Spaces",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://huggingface.co/api/spaces?author=microsoft&full=true",
+							"protocol": "https",
+							"host": [
+								"huggingface",
+								"co"
+							],
+							"path": [
+								"api",
+								"spaces"
+							],
+							"query": [
+								{
+									"key": "author",
+									"value": "microsoft"
+								},
+								{
+									"key": "full",
+									"value": "true"
+								}
+							]
+						},
+						"description": "Get all spaces for an organization directly from HuggingFace."
+					},
+					"response": []
+				},
+				{
+					"name": "HF - Get PRs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://huggingface.co/api/models/microsoft/phi-2/discussions?types=pr&status=all",
+							"protocol": "https",
+							"host": [
+								"huggingface",
+								"co"
+							],
+							"path": [
+								"api",
+								"models",
+								"microsoft",
+								"phi-2",
 								"discussions"
 							],
 							"query": [
@@ -199,20 +977,18 @@
 									"value": "all"
 								}
 							]
-						}
+						},
+						"description": "Get pull requests directly from HuggingFace API."
 					},
 					"response": []
 				},
 				{
-					"name": "Get - Discussion",
+					"name": "HF - Get Discussions",
 					"request": {
-						"auth": {
-							"type": "noauth"
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://huggingface.co/api/models/meta-llama/Meta-Llama-3-70B-Instruct/discussions?types=discussions&status=all",
+							"raw": "https://huggingface.co/api/models/microsoft/phi-2/discussions?types=discussion&status=all",
 							"protocol": "https",
 							"host": [
 								"huggingface",
@@ -221,25 +997,88 @@
 							"path": [
 								"api",
 								"models",
-								"meta-llama",
-								"Meta-Llama-3-70B-Instruct",
+								"microsoft",
+								"phi-2",
 								"discussions"
 							],
 							"query": [
 								{
 									"key": "types",
-									"value": "discussions"
+									"value": "discussion"
 								},
 								{
 									"key": "status",
 									"value": "all"
 								}
 							]
-						}
+						},
+						"description": "Get discussions directly from HuggingFace API."
+					},
+					"response": []
+				},
+				{
+					"name": "HF - Get File Content",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://huggingface.co/microsoft/phi-2/resolve/main/README.md",
+							"protocol": "https",
+							"host": [
+								"huggingface",
+								"co"
+							],
+							"path": [
+								"microsoft",
+								"phi-2",
+								"resolve",
+								"main",
+								"README.md"
+							]
+						},
+						"description": "Get file content directly from HuggingFace repository."
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Reference collection of direct HuggingFace API calls (not through your backend)"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "scan_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "storage_id",
+			"value": "",
+			"type": "string"
 		}
 	]
 }
