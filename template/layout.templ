@@ -81,9 +81,19 @@ templ Layout(title string) {
 		}
 		</script>
 		
-		<script src="https://cdn.tailwindcss.com"></script>
-		<script src="https://unpkg.com/htmx.org@1.9.10"></script>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+		<!-- Preconnect to CDNs for faster loading -->
+		<link rel="preconnect" href="https://cdn.tailwindcss.com"/>
+		<link rel="preconnect" href="https://unpkg.com"/>
+		<link rel="preconnect" href="https://cdnjs.cloudflare.com"/>
+		<link rel="dns-prefetch" href="https://cdn.tailwindcss.com"/>
+		<link rel="dns-prefetch" href="https://unpkg.com"/>
+		<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com"/>
+		
+		<!-- Load critical CSS first (Font Awesome) -->
+		<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
+		<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/></noscript>
+		
+		<!-- Inline critical CSS -->
 			<style>
 				:root {
 					--primary-yellow: #FFC107;
@@ -116,7 +126,24 @@ templ Layout(title string) {
 				.htmx-request.htmx-indicator {
 					display: block;
 				}
+				
+				/* Performance: Prevent layout shifts */
+				body {
+					font-display: swap;
+				}
+				
+				/* Improve rendering performance */
+				* {
+					-webkit-font-smoothing: antialiased;
+					-moz-osx-font-smoothing: grayscale;
+				}
 			</style>
+			
+			<!-- Load Tailwind CSS (non-blocking) -->
+			<script src="https://cdn.tailwindcss.com" defer></script>
+			
+			<!-- Load HTMX (defer for better performance) -->
+			<script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
 		</head>
 		<body class="bg-black min-h-screen">
 			<nav class="bg-black border-b-4 border-yellow-400 shadow-lg">

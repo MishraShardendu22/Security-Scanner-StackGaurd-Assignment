@@ -17,7 +17,12 @@ import (
 	"github.com/MishraShardendu22/Scanner/route"
 	"github.com/MishraShardendu22/Scanner/util"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cache"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/etag"
+	"github.com/gofiber/fiber/v2/middleware/favicon"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
@@ -49,14 +54,33 @@ func main() {
 	)
 
 	app := fiber.New(fiber.Config{
+		AppName:               "Security Scanner",
+		ServerHeader:          "Security-Scanner",
+		ReadTimeout:           30 * time.Second,
+		WriteTimeout:          30 * time.Second,
+		IdleTimeout:           120 * time.Second,
+		DisableStartupMessage: false,
 
-		AppName:      "Security Scanner",
-		ServerHeader: "Security-Scanner",
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 30 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		// Performance optimizations
+		Prefork:              false, // Set to true in production for multi-core usage
+		StrictRouting:        false,
+		CaseSensitive:        false,
+		UnescapePath:         true,
+		ETag:                 true,            // Enable ETag for caching
+		BodyLimit:            4 * 1024 * 1024, // 4MB body limit
+		Concurrency:          256 * 1024,      // Max concurrent connections
+		ReadBufferSize:       4096,
+		WriteBufferSize:      4096,
+		CompressedFileSuffix: ".fiber.gz",
+		ProxyHeader:          fiber.HeaderXForwardedFor,
+
+		// Disable unnecessary features for performance
+		DisableKeepalive:          false,
+		DisableDefaultDate:        false,
+		DisableDefaultContentType: false,
+		DisableHeaderNormalizing:  false,
+
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
-
 			logger.Error("request error", slog.Group("req",
 				slog.String("method", c.Method()),
 				slog.String("path", c.Path()),
@@ -166,21 +190,71 @@ func loadConfig() *models.Config {
 }
 
 func setupMiddleware(app *fiber.App, config *models.Config) {
-
+	// 1. Recover middleware - must be first
 	app.Use(recover.New(recover.Config{
 		EnableStackTrace: config.Environment == "development",
 	}))
-	
-	app.Use(cors.New(cors.Config{
 
+	// 2. Compression middleware - compress responses (gzip)
+	app.Use(compress.New(compress.Config{
+		Level: compress.LevelBestSpeed, // Balance between speed and compression
+	}))
+
+	// 3. ETag middleware - enable caching with ETags
+	app.Use(etag.New(etag.Config{
+		Weak: true, // Use weak ETags for better performance
+	}))
+
+	// 4. Cache middleware for static content and API responses
+	app.Use(cache.New(cache.Config{
+		Next: func(c *fiber.Ctx) bool {
+			// Skip cache for POST, PUT, DELETE, PATCH requests
+			return c.Method() != "GET" && c.Method() != "HEAD"
+		},
+		Expiration:           5 * time.Minute, // Cache for 5 minutes
+		CacheControl:         true,            // Add Cache-Control headers
+		CacheHeader:          "X-Cache",       // Custom header to show cache status
+		Methods:              []string{"GET", "HEAD"},
+		StoreResponseHeaders: true,
+		KeyGenerator: func(c *fiber.Ctx) string {
+			return c.Path() + "?" + c.Request().URI().QueryArgs().String()
+		},
+	}))
+
+	// 5. Rate limiting to prevent abuse
+	app.Use(limiter.New(limiter.Config{
+		Max:        100,             // 100 requests
+		Expiration: 1 * time.Minute, // per minute
+		KeyGenerator: func(c *fiber.Ctx) string {
+			return c.IP()
+		},
+		LimitReached: func(c *fiber.Ctx) error {
+			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
+				"error": "Too many requests, please try again later",
+			})
+		},
+		SkipFailedRequests:     false,
+		SkipSuccessfulRequests: false,
+		LimiterMiddleware:      limiter.SlidingWindow{},
+	}))
+
+	// 6. Favicon middleware - cache favicon
+	app.Use(favicon.New(favicon.Config{
+		File:         "./public/favicon.ico",
+		CacheControl: "public, max-age=31536000", // Cache for 1 year
+	}))
+
+	// 7. CORS middleware
+	app.Use(cors.New(cors.Config{
 		AllowOrigins:  config.CorsAllowOrigins,
 		AllowMethods:  "GET,POST,PUT,PATCH,DELETE,OPTIONS",
 		AllowHeaders:  "Origin, Content-Type, Accept, Authorization",
 		ExposeHeaders: "Content-Length",
 		MaxAge:        86400,
 	}))
-	app.Use(logger.New(logger.Config{
 
+	// 8. Logger middleware - should be last
+	app.Use(logger.New(logger.Config{
 		Format:     "[${time}] ${status} - ${latency} ${method} ${path}\n",
 		TimeFormat: "2006-01-02 15:04:05",
 		TimeZone:   "Local",
