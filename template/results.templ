@@ -1,0 +1,163 @@
+package template
+
+import (
+	"github.com/MishraShardendu22/Scanner/models"
+	"fmt"
+)
+
+templ ResultsList(results []models.SCAN_RESULT) {
+	@Layout("Scan Results") {
+		<div class="max-w-6xl mx-auto">
+			<div class="bg-white rounded-lg shadow-lg p-8">
+				<h2 class="text-3xl font-bold mb-6 text-gray-800">
+					<i class="fas fa-list-alt mr-3 text-blue-600"></i>All Scan Results
+				</h2>
+				if len(results) == 0 {
+					<div class="text-center py-12">
+						<i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+						<p class="text-xl text-gray-500">No scan results found</p>
+						<a href="/scan" class="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition">
+							Start New Scan
+						</a>
+					</div>
+				} else {
+					<div class="grid gap-6">
+						for _, result := range results {
+							<div class="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition">
+								<div class="flex items-center justify-between mb-4">
+									<div>
+										<h3 class="text-xl font-bold text-gray-800">Request ID: { result.RequestID }</h3>
+										<p class="text-sm text-gray-500">Created: { result.CreatedAt.Format("2006-01-02 15:04:05") }</p>
+									</div>
+									<a href={ templ.URL(fmt.Sprintf("/results/%s", result.RequestID)) } class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+										<i class="fas fa-eye mr-2"></i>View Details
+									</a>
+								</div>
+								<div class="flex items-center space-x-4 text-sm">
+									<span class="text-gray-600">
+										<i class="fas fa-folder mr-2"></i>{ fmt.Sprintf("%d", len(result.ScannedResources)) } Resources
+									</span>
+									<span class="text-gray-600">
+										<i class="fas fa-exclamation-triangle mr-2"></i>
+										{ fmt.Sprintf("%d", countTotalFindings(result.ScannedResources)) } Findings
+									</span>
+								</div>
+							</div>
+						}
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+templ ResultDetail(result models.SCAN_RESULT) {
+	@Layout("Scan Detail") {
+		<div class="max-w-6xl mx-auto">
+			<!-- Header -->
+			<div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+				<div class="flex items-center justify-between mb-4">
+					<h2 class="text-3xl font-bold text-gray-800">
+						<i class="fas fa-clipboard-list mr-3 text-blue-600"></i>Scan Results
+					</h2>
+					<a href="/results" class="text-blue-600 hover:text-blue-800 transition">
+						<i class="fas fa-arrow-left mr-2"></i>Back to All Results
+					</a>
+				</div>
+				<div class="grid md:grid-cols-3 gap-4 text-sm">
+					<div class="bg-gray-50 p-4 rounded">
+						<div class="text-gray-500 mb-1">Request ID</div>
+						<div class="font-mono text-gray-800">{ result.RequestID }</div>
+					</div>
+					<div class="bg-gray-50 p-4 rounded">
+						<div class="text-gray-500 mb-1">Created At</div>
+						<div class="font-semibold text-gray-800">{ result.CreatedAt.Format("2006-01-02 15:04:05") }</div>
+					</div>
+					<div class="bg-gray-50 p-4 rounded">
+						<div class="text-gray-500 mb-1">Total Findings</div>
+						<div class="font-semibold text-red-600 text-2xl">{ fmt.Sprintf("%d", countTotalFindings(result.ScannedResources)) }</div>
+					</div>
+				</div>
+			</div>
+			<!-- Scanned Resources -->
+			if len(result.ScannedResources) == 0 {
+				<div class="bg-white rounded-lg shadow-lg p-8 text-center">
+					<i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+					<h3 class="text-2xl font-bold text-gray-800 mb-2">No Security Issues Found</h3>
+					<p class="text-gray-600">The scan completed successfully with no exposed secrets detected.</p>
+				</div>
+			} else {
+				for _, resource := range result.ScannedResources {
+					<div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+						<div class="flex items-center justify-between mb-6">
+							<h3 class="text-2xl font-bold text-gray-800">
+								if resource.Type == "model" {
+									<i class="fas fa-robot mr-2 text-blue-600"></i>Model
+								} else if resource.Type == "dataset" {
+									<i class="fas fa-database mr-2 text-green-600"></i>Dataset
+								} else if resource.Type == "space" {
+									<i class="fas fa-cube mr-2 text-purple-600"></i>Space
+								}
+								: { resource.ID }
+							</h3>
+							<span class="bg-red-100 text-red-800 px-4 py-2 rounded-full font-semibold">
+								{ fmt.Sprintf("%d", len(resource.Findings)) } Finding(s)
+							</span>
+						</div>
+						if len(resource.Findings) > 0 {
+							<div class="space-y-4">
+								for idx, finding := range resource.Findings {
+									<div class="border-l-4 border-red-500 bg-red-50 p-4 rounded-r">
+										<div class="flex items-start justify-between mb-2">
+											<div class="flex items-center space-x-2">
+												<span class="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+													{ fmt.Sprintf("%d", idx+1) }
+												</span>
+												<span class="font-bold text-red-800">{ finding.SecretType }</span>
+											</div>
+											<span class="text-xs bg-red-200 text-red-800 px-2 py-1 rounded">{ finding.SourceType }</span>
+										</div>
+										<div class="ml-8 space-y-2 text-sm">
+											<div>
+												<span class="text-gray-600">Pattern:</span>
+												<code class="ml-2 bg-white px-2 py-1 rounded text-xs">{ finding.Pattern }</code>
+											</div>
+											<div>
+												<span class="text-gray-600">Secret:</span>
+												<code class="ml-2 bg-white px-2 py-1 rounded text-xs font-mono">{ finding.Secret }</code>
+											</div>
+											if finding.FileName != "" {
+												<div>
+													<span class="text-gray-600">File:</span>
+													<span class="ml-2 font-mono text-gray-800">{ finding.FileName }</span>
+													if finding.Line > 0 {
+														<span class="text-gray-500"> (Line { fmt.Sprintf("%d", finding.Line) })</span>
+													}
+												</div>
+											}
+											if finding.DiscussionTitle != "" {
+												<div>
+													<span class="text-gray-600">Discussion:</span>
+													<span class="ml-2 text-gray-800">{ finding.DiscussionTitle }</span>
+													<span class="text-gray-500"> (#{fmt.Sprintf("%d", finding.DiscussionNum)})</span>
+												</div>
+											}
+										</div>
+									</div>
+								}
+							</div>
+						}
+					</div>
+				}
+			}
+		</div>
+	}
+}
+
+func countTotalFindings(resources []models.SCANNED_RESOURCE) int {
+	total := 0
+	for _, resource := range resources {
+		total += len(resource.Findings)
+	}
+	return total
+}

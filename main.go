@@ -4,6 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
+	"log"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/MishraShardendu22/Scanner/database"
 	"github.com/MishraShardendu22/Scanner/models"
 	"github.com/MishraShardendu22/Scanner/route"
@@ -13,13 +21,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
-	"io"
-	"log"
-	"log/slog"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 var (
@@ -86,6 +87,10 @@ func main() {
 
 func SetUpRoutes(app *fiber.App, logger *slog.Logger, config *models.Config) {
 
+	// Web routes (HTML pages)
+	route.RegisterWebRoutes(app)
+
+	// API routes
 	app.Get("/api/test", func(c *fiber.Ctx) error {
 
 		return util.ResponseAPI(c, fiber.StatusOK, "API is working fine", nil, "")
