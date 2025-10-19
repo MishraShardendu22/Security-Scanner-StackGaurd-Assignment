@@ -7,6 +7,16 @@ import (
 )
 
 func RegisterWebRoutes(app *fiber.App) {
+	// SEO files
+	app.Get("/robots.txt", func(c *fiber.Ctx) error {
+		return c.SendFile("./public/robots.txt")
+	})
+
+	app.Get("/sitemap.xml", func(c *fiber.Ctx) error {
+		c.Set("Content-Type", "application/xml")
+		return c.SendFile("./public/sitemap.xml")
+	})
+
 	// Home page
 	app.Get("/", func(c *fiber.Ctx) error {
 		c.Set("Content-Type", "text/html; charset=utf-8")

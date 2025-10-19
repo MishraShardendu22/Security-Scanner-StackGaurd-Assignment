@@ -1,0 +1,33 @@
+# robots.txt for StackGuard Security Scanner
+# https://security-scanner-stackgaurd-assignment.onrender.com/
+
+User-agent: *
+Allow: /
+Allow: /dashboard
+Allow: /scan
+Allow: /results
+Allow: /api-tester
+
+# Disallow API endpoints from indexing
+Disallow: /api/
+Disallow: /fetch/
+Disallow: /org/
+
+# Sitemap
+Sitemap: https://security-scanner-stackgaurd-assignment.onrender.com/sitemap.xml
+
+# Crawl-delay (be nice to the server)
+Crawl-delay: 1
+
+# Specific bot rules
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
