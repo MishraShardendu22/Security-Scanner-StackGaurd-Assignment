@@ -1,144 +1,205 @@
 package template
 
 templ ScanForm() {
-	@Layout("New Scan") {
-		<div class="max-w-4xl mx-auto">
-			<div class="bg-white rounded-lg shadow-lg p-8">
-				<h2 class="text-3xl font-bold mb-6 text-gray-800">
-					<i class="fas fa-search-plus mr-3 text-blue-600"></i>Start New Security Scan
-				</h2>
-				<form id="scanForm" class="space-y-6">
-					<!-- Resource Type Selection -->
-					<div>
-						<label class="block text-gray-700 font-semibold mb-2">Select Resource Type</label>
-						<div class="grid grid-cols-3 gap-4">
-							<label class="cursor-pointer">
-								<input type="radio" name="resourceType" value="model" class="peer sr-only" checked/>
-								<div class="border-2 border-gray-300 peer-checked:border-blue-600 peer-checked:bg-blue-50 rounded-lg p-4 text-center transition">
-									<i class="fas fa-robot text-3xl mb-2 text-blue-600"></i>
-									<div class="font-semibold">AI Model</div>
-								</div>
-							</label>
-							<label class="cursor-pointer">
-								<input type="radio" name="resourceType" value="dataset" class="peer sr-only"/>
-								<div class="border-2 border-gray-300 peer-checked:border-green-600 peer-checked:bg-green-50 rounded-lg p-4 text-center transition">
-									<i class="fas fa-database text-3xl mb-2 text-green-600"></i>
-									<div class="font-semibold">Dataset</div>
-								</div>
-							</label>
-							<label class="cursor-pointer">
-								<input type="radio" name="resourceType" value="space" class="peer sr-only"/>
-								<div class="border-2 border-gray-300 peer-checked:border-purple-600 peer-checked:bg-purple-50 rounded-lg p-4 text-center transition">
-									<i class="fas fa-cube text-3xl mb-2 text-purple-600"></i>
-									<div class="font-semibold">Space</div>
-								</div>
-							</label>
-						</div>
-					</div>
-					<!-- Organization/User -->
-					<div>
-						<label for="org" class="block text-gray-700 font-semibold mb-2">
-							<i class="fas fa-building mr-2"></i>Organization / User
-						</label>
-						<input type="text" id="org" name="org" placeholder="e.g., huggingface, meta-llama" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required/>
-					</div>
-					<!-- Resource ID -->
-					<div>
-						<label for="resourceId" class="block text-gray-700 font-semibold mb-2">
-							<i class="fas fa-tag mr-2"></i>Resource ID
-						</label>
-						<input type="text" id="resourceId" name="resourceId" placeholder="e.g., bert-base-uncased, my-dataset" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required/>
-					</div>
-					<!-- Options -->
-					<div class="bg-gray-50 rounded-lg p-4 space-y-3">
-						<h3 class="font-semibold text-gray-700 mb-3">
-							<i class="fas fa-cog mr-2"></i>Scan Options
-						</h3>
-						<label class="flex items-center space-x-3 cursor-pointer">
-							<input type="checkbox" name="includePRs" class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"/>
-							<span class="text-gray-700">Include Pull Requests</span>
-						</label>
-						<label class="flex items-center space-x-3 cursor-pointer">
-							<input type="checkbox" name="includeDiscussions" class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"/>
-							<span class="text-gray-700">Include Discussions</span>
-						</label>
-					</div>
-					<!-- Submit Button -->
-					<div class="flex space-x-4">
-						<button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-lg">
-							<i class="fas fa-play-circle mr-2"></i>Start Scan
-						</button>
-						<button type="reset" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transition">
-							<i class="fas fa-redo mr-2"></i>Reset
-						</button>
-					</div>
-				</form>
-				<!-- Results Section -->
-				<div id="scanResults" class="mt-8 hidden">
-					<div class="border-t pt-6">
-						<h3 class="text-2xl font-bold mb-4 text-gray-800">
-							<i class="fas fa-chart-bar mr-2 text-green-600"></i>Scan Results
-						</h3>
-						<div id="resultsContent" class="space-y-4">
-							<!-- Results will be inserted here dynamically -->
-						</div>
-					</div>
+@Layout("New Scan") {
+<div class="w-full">
+<div class="bg-black border-4 border-yellow-400 shadow-lg p-8">
+<h2 class="text-3xl font-bold mb-6 text-yellow-400">
+Start New Security Scan
+</h2>
+<form id="scanForm">
+<!-- Two Column Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+	<!-- Left Column - Resource Type Selection -->
+	<div>
+		<label class="block text-yellow-400 font-semibold mb-4 text-lg">Select Resource Type</label>
+		<div class="space-y-4">
+			<label class="cursor-pointer block">
+				<input type="radio" name="resourceType" value="model" class="peer sr-only" checked/>
+				<div class="border-2 border-yellow-400 peer-checked:bg-yellow-400 bg-black p-6 text-center transition hover:bg-yellow-400 group">
+					<i class="fas fa-robot text-4xl mb-3 text-yellow-400 group-hover:text-black"></i>
+					<div class="font-bold text-yellow-400 group-hover:text-black text-xl">AI Model</div>
 				</div>
-				<!-- Loading Spinner -->
-				<div id="loadingSpinner" class="mt-8 text-center hidden">
-					<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-					<p class="mt-4 text-gray-600">Scanning in progress...</p>
+			</label>
+			<label class="cursor-pointer block">
+				<input type="radio" name="resourceType" value="dataset" class="peer sr-only"/>
+				<div class="border-2 border-yellow-400 peer-checked:bg-yellow-400 bg-black p-6 text-center transition hover:bg-yellow-400 group">
+					<i class="fas fa-database text-4xl mb-3 text-yellow-400 group-hover:text-black"></i>
+					<div class="font-bold text-yellow-400 group-hover:text-black text-xl">Dataset</div>
 				</div>
-			</div>
+			</label>
+			<label class="cursor-pointer block">
+				<input type="radio" name="resourceType" value="space" class="peer sr-only"/>
+				<div class="border-2 border-yellow-400 peer-checked:bg-yellow-400 bg-black p-6 text-center transition hover:bg-yellow-400 group">
+					<i class="fas fa-cube text-4xl mb-3 text-yellow-400 group-hover:text-black"></i>
+					<div class="font-bold text-yellow-400 group-hover:text-black text-xl">Space</div>
+				</div>
+			</label>
 		</div>
-		<script>
-			document.getElementById('scanForm').addEventListener('submit', async (e) => {
-				e.preventDefault();
-				
-				const formData = new FormData(e.target);
-				const resourceType = formData.get('resourceType');
-				const org = formData.get('org');
-				const resourceId = formData.get('resourceId');
-				const includePRs = formData.get('includePRs') === 'on';
-				const includeDiscussions = formData.get('includeDiscussions') === 'on';
-				
-				const payload = {
-					org: org,
-					include_prs: includePRs,
-					include_discussions: includeDiscussions
-				};
-				
-				if (resourceType === 'model') payload.model_id = resourceId;
-				else if (resourceType === 'dataset') payload.dataset_id = resourceId;
-				else if (resourceType === 'space') payload.space_id = resourceId;
-				
-				// Show loading
-				document.getElementById('loadingSpinner').classList.remove('hidden');
-				document.getElementById('scanResults').classList.add('hidden');
-				
-				try {
-					const response = await fetch('/scan', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(payload)
-					});
-					
-					const result = await response.json();
-					
-					// Hide loading
-					document.getElementById('loadingSpinner').classList.add('hidden');
-					
-					if (result.status === 'success') {
-						// Redirect to results page
-						window.location.href = `/results/${result.data.request_id}`;
-					} else {
-						alert('Scan failed: ' + (result.message || 'Unknown error'));
-					}
-				} catch (error) {
-					document.getElementById('loadingSpinner').classList.add('hidden');
-					alert('Error: ' + error.message);
-				}
-			});
-		</script>
+	</div>
+	
+	<!-- Right Column - Input Fields -->
+	<div class="space-y-6">
+		<!-- Organization/User -->
+		<div>
+			<label for="org" class="block text-yellow-400 font-semibold mb-2">
+				Organization / User
+			</label>
+			<input type="text" id="org" name="org" placeholder="e.g., huggingface, meta-llama" class="w-full px-4 py-3 border-2 border-yellow-400 bg-black text-yellow-400 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 placeholder-gray-600" required/>
+		</div>
+		<!-- Resource ID -->
+		<div>
+			<label for="resourceId" class="block text-yellow-400 font-semibold mb-2">
+				Resource ID
+			</label>
+			<input type="text" id="resourceId" name="resourceId" placeholder="e.g., bert-base-uncased, my-dataset" class="w-full px-4 py-3 border-2 border-yellow-400 bg-black text-yellow-400 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 placeholder-gray-600" required/>
+		</div>
+		<!-- Options -->
+		<div class="bg-black border-2 border-yellow-400 p-4 space-y-3">
+			<h3 class="font-semibold text-yellow-400 mb-3">
+				Scan Options
+			</h3>
+			<label class="flex items-center space-x-3 cursor-pointer">
+				<input type="checkbox" name="includePRs" class="w-5 h-5 text-yellow-400 border-yellow-400 focus:ring-2 focus:ring-yellow-400"/>
+				<span class="text-white">Include Pull Requests</span>
+			</label>
+			<label class="flex items-center space-x-3 cursor-pointer">
+				<input type="checkbox" name="includeDiscussions" class="w-5 h-5 text-yellow-400 border-yellow-400 focus:ring-2 focus:ring-yellow-400"/>
+				<span class="text-white">Include Discussions</span>
+			</label>
+		</div>
+		<!-- Submit Button -->
+		<div class="flex space-x-4">
+			<button type="submit" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 transition shadow-lg">
+				Start Scan
+			</button>
+			<button type="reset" class="bg-black border-2 border-yellow-400 hover:bg-yellow-400 hover:text-black text-white font-bold py-3 px-6 transition">
+				Reset
+			</button>
+		</div>
+	</div>
+</div>
+</form>
+<!-- Results Section -->
+<div id="scanResults" class="mt-8 hidden">
+<div class="border-t-2 border-yellow-400 pt-6">
+<h3 class="text-2xl font-bold mb-4 text-yellow-400">
+<i class="fas fa-chart-bar mr-2 text-yellow-400"></i>Scan Results
+</h3>
+<div id="resultsContent" class="space-y-4">
+<!-- Results will be inserted here dynamically -->
+</div>
+</div>
+</div>
+<!-- Loading Spinner -->
+<div id="loadingSpinner" class="mt-8 text-center hidden">
+<div class="inline-block rounded-full h-12 w-12 border-4 border-gray-700 border-t-yellow-400" style="animation: spin 1s linear infinite;"></div>
+<p class="mt-4 text-gray-300 font-medium">Scanning in progress...</p>
+</div>
+</div>
+</div>
+<style>
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+</style>
+<script>
+// Handle resource type selection to show icons
+document.querySelectorAll('input[name="resourceType"]').forEach(radio => {
+	radio.addEventListener('change', function() {
+		// Remove selected styles from all
+		document.querySelectorAll('input[name="resourceType"]').forEach(r => {
+			const container = r.nextElementSibling;
+			const icon = container.querySelector('i');
+			const text = container.querySelector('div');
+			
+			container.classList.remove('bg-yellow-400');
+			container.classList.add('bg-black');
+			icon.classList.remove('text-black');
+			icon.classList.add('text-yellow-400');
+			text.classList.remove('text-black');
+			text.classList.add('text-yellow-400');
+		});
+		
+		// Add selected styles to checked one
+		const container = this.nextElementSibling;
+		const icon = container.querySelector('i');
+		const text = container.querySelector('div');
+		
+		container.classList.remove('bg-black');
+		container.classList.add('bg-yellow-400');
+		icon.classList.remove('text-yellow-400');
+		icon.classList.add('text-black');
+		text.classList.remove('text-yellow-400');
+		text.classList.add('text-black');
+	});
+});
+
+// Set initial state on page load
+window.addEventListener('DOMContentLoaded', function() {
+	const checkedRadio = document.querySelector('input[name="resourceType"]:checked');
+	if (checkedRadio) {
+		const container = checkedRadio.nextElementSibling;
+		const icon = container.querySelector('i');
+		const text = container.querySelector('div');
+		
+		container.classList.remove('bg-black');
+		container.classList.add('bg-yellow-400');
+		icon.classList.remove('text-yellow-400');
+		icon.classList.add('text-black');
+		text.classList.remove('text-yellow-400');
+		text.classList.add('text-black');
 	}
+});
+
+document.getElementById('scanForm').addEventListener('submit', async (e) => {
+e.preventDefault();
+
+const formData = new FormData(e.target);
+const resourceType = formData.get('resourceType');
+const org = formData.get('org');
+const resourceId = formData.get('resourceId');
+const includePRs = formData.get('includePRs') === 'on';
+const includeDiscussions = formData.get('includeDiscussions') === 'on';
+
+const payload = {
+org: org,
+include_prs: includePRs,
+include_discussions: includeDiscussions
+};
+
+if (resourceType === 'model') payload.model_id = resourceId;
+else if (resourceType === 'dataset') payload.dataset_id = resourceId;
+else if (resourceType === 'space') payload.space_id = resourceId;
+
+// Show loading
+document.getElementById('loadingSpinner').classList.remove('hidden');
+document.getElementById('scanResults').classList.add('hidden');
+
+try {
+const response = await fetch('/scan', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify(payload)
+});
+
+const result = await response.json();
+
+// Hide loading
+document.getElementById('loadingSpinner').classList.add('hidden');
+
+if (result.status === 'success') {
+// Redirect to results page
+window.location.href = `/results/${result.data.request_id}`;
+} else {
+alert('Scan failed: ' + (result.message || 'Unknown error'));
+}
+} catch (error) {
+document.getElementById('loadingSpinner').classList.add('hidden');
+alert('Error: ' + error.message);
+}
+});
+</script>
+}
 }

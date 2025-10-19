@@ -10,7 +10,7 @@ func RegisterWebRoutes(app *fiber.App) {
 	// Home page
 	app.Get("/", func(c *fiber.Ctx) error {
 		c.Set("Content-Type", "text/html; charset=utf-8")
-		return template.Index().Render(c.Context(), c.Response().BodyWriter())
+		return template.IndexNew().Render(c.Context(), c.Response().BodyWriter())
 	})
 
 	// Dashboard page

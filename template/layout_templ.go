@@ -36,13 +36,13 @@ func Layout(title string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/layout.templ`, Line: 9, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/layout.templ`, Line: 9, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Security Scanner</title><script src=\"https://cdn.tailwindcss.com\"></script><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\"></head><body class=\"bg-gray-50\"><nav class=\"bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg\"><div class=\"container mx-auto px-4 py-4\"><div class=\"flex items-center justify-between\"><div class=\"flex items-center space-x-3\"><i class=\"fas fa-shield-alt text-2xl\"></i><h1 class=\"text-2xl font-bold\">StackGuard Security Scanner</h1></div><div class=\"flex space-x-6\"><a href=\"/\" class=\"hover:text-blue-200 transition\"><i class=\"fas fa-home mr-2\"></i>Home</a> <a href=\"/dashboard\" class=\"hover:text-blue-200 transition\"><i class=\"fas fa-chart-line mr-2\"></i>Dashboard</a> <a href=\"/scan\" class=\"hover:text-blue-200 transition\"><i class=\"fas fa-search mr-2\"></i>New Scan</a> <a href=\"/results\" class=\"hover:text-blue-200 transition\"><i class=\"fas fa-list mr-2\"></i>Results</a> <a href=\"/api-tester\" class=\"hover:text-blue-200 transition\"><i class=\"fas fa-flask mr-2\"></i>API Tester</a></div></div></div></nav><main class=\"container mx-auto px-4 py-8\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Security Scanner</title><link rel=\"icon\" type=\"image/svg+xml\" href=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23FFC107' d='M50 10 L90 30 L90 70 L50 90 L10 70 L10 30 Z'/%3E%3Cpath fill='%23000' d='M50 30 C60 30 68 38 68 48 C68 58 60 66 50 66 C40 66 32 58 32 48 C32 38 40 30 50 30 M50 40 C45 40 42 43 42 48 C42 53 45 56 50 56 C55 56 58 53 58 48 C58 43 55 40 50 40'/%3E%3C/svg%3E\"><script src=\"https://cdn.tailwindcss.com\"></script><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\"><style>\n\t\t\t\t:root {\n\t\t\t\t\t--primary-yellow: #FFC107;\n\t\t\t\t\t--dark-yellow: #FFA000;\n\t\t\t\t\t--light-yellow: #FFECB3;\n\t\t\t\t\t--primary-black: #1A1A1A;\n\t\t\t\t\t--secondary-black: #2D2D2D;\n\t\t\t\t\t--accent-black: #404040;\n\t\t\t\t}\n\t\t\t</style></head><body class=\"bg-black min-h-screen\"><nav class=\"bg-black border-b-4 border-yellow-400 shadow-lg\"><div class=\"w-full px-8 py-4\"><div class=\"flex items-center justify-between\"><div class=\"flex items-center space-x-3\"><i class=\"fas fa-shield-alt text-2xl text-yellow-400\"></i><h1 class=\"text-2xl font-bold text-white\">StackGuard Security Scanner</h1></div><div class=\"flex space-x-6\"><a href=\"/\" class=\"text-white hover:text-yellow-400 transition font-medium\"><i class=\"fas fa-home mr-2\"></i>Home</a> <a href=\"/dashboard\" class=\"text-white hover:text-yellow-400 transition font-medium\"><i class=\"fas fa-chart-line mr-2\"></i>Dashboard</a> <a href=\"/scan\" class=\"text-white hover:text-yellow-400 transition font-medium\"><i class=\"fas fa-search mr-2\"></i>New Scan</a> <a href=\"/results\" class=\"text-white hover:text-yellow-400 transition font-medium\"><i class=\"fas fa-list mr-2\"></i>Results</a> <a href=\"/api-tester\" class=\"text-white hover:text-yellow-400 transition font-medium\"><i class=\"fas fa-flask mr-2\"></i>API Tester</a></div></div></div></nav><main class=\"w-full px-8 py-8\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</main><footer class=\"bg-gray-800 text-white mt-16\"><div class=\"container mx-auto px-4 py-6 text-center\"><p>&copy; 2025 StackGuard Security Scanner. All rights reserved.</p></div></footer></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</main></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

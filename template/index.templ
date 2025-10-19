@@ -3,130 +3,129 @@ package template
 templ IndexNew() {
 	@Layout("Home") {
 		<!-- Hero Section -->
-		<div class="relative bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 rounded-2xl shadow-2xl p-12 mb-12 overflow-hidden">
-			<div class="absolute inset-0 bg-black opacity-10"></div>
-			<div class="relative z-10 text-white text-center max-w-4xl mx-auto">
+		<div class="bg-black border-4 border-yellow-400 shadow-2xl p-12 mb-12">
+			<div class="text-center w-full">
 				<div class="mb-6">
-					<i class="fas fa-shield-alt text-6xl mb-4 animate-pulse"></i>
+					<i class="fas fa-shield-alt text-6xl text-yellow-400 mb-4"></i>
 				</div>
-				<h1 class="text-5xl md:text-6xl font-bold mb-6">StackGuard Security Scanner</h1>
-				<p class="text-xl md:text-2xl mb-8 text-blue-100">
+				<h1 class="text-5xl md:text-6xl font-bold mb-6 text-white">StackGuard Security Scanner</h1>
+				<p class="text-xl md:text-2xl mb-8 text-white">
 					Protect your AI/ML resources from leaked secrets and vulnerabilities
 				</p>
 				<div class="flex justify-center space-x-4">
-					<a href="/scan" class="bg-white text-blue-600 hover:bg-blue-50 font-bold py-4 px-8 rounded-xl text-lg transition transform hover:scale-105 shadow-lg">
-						<i class="fas fa-play mr-2"></i>Start Scanning
+					<a href="/scan" class="bg-yellow-400 text-black hover:bg-yellow-500 font-bold py-4 px-8 text-lg transition shadow-lg">
+						Start Scanning
 					</a>
-					<a href="/dashboard" class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-4 px-8 rounded-xl text-lg transition transform hover:scale-105 shadow-lg">
-						<i class="fas fa-chart-line mr-2"></i>View Dashboard
+					<a href="/dashboard" class="bg-black border-2 border-yellow-400 hover:bg-gray-900 text-white font-bold py-4 px-8 text-lg transition shadow-lg">
+						View Dashboard
 					</a>
 				</div>
 			</div>
 		</div>
 		<!-- Stats Banner -->
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-			<div class="bg-white rounded-xl shadow-md p-6 text-center transform hover:scale-105 transition">
-				<div class="text-3xl font-bold text-blue-600 mb-2">15+</div>
-				<div class="text-gray-600 text-sm">Secret Patterns</div>
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+			<div class="bg-yellow-400 border-4 border-yellow-400 shadow-md p-6">
+				<div class="text-3xl font-bold text-black mb-2">15+</div>
+				<div class="text-black text-sm font-medium">Secret Patterns</div>
 			</div>
-			<div class="bg-white rounded-xl shadow-md p-6 text-center transform hover:scale-105 transition">
-				<div class="text-3xl font-bold text-green-600 mb-2">100%</div>
-				<div class="text-gray-600 text-sm">Automated</div>
+			<div class="bg-yellow-400 border-4 border-yellow-400 shadow-md p-6">
+				<div class="text-3xl font-bold text-black mb-2">100%</div>
+				<div class="text-black text-sm font-medium">Automated</div>
 			</div>
-			<div class="bg-white rounded-xl shadow-md p-6 text-center transform hover:scale-105 transition">
-				<div class="text-3xl font-bold text-purple-600 mb-2">Fast</div>
-				<div class="text-gray-600 text-sm">Real-time Scan</div>
+			<div class="bg-yellow-400 border-4 border-yellow-400 shadow-md p-6">
+				<div class="text-3xl font-bold text-black mb-2">Fast</div>
+				<div class="text-black text-sm font-medium">Real-time Scan</div>
 			</div>
-			<div class="bg-white rounded-xl shadow-md p-6 text-center transform hover:scale-105 transition">
-				<div class="text-3xl font-bold text-red-600 mb-2">24/7</div>
-				<div class="text-gray-600 text-sm">Monitoring</div>
+			<div class="bg-yellow-400 border-4 border-yellow-400 shadow-md p-6">
+				<div class="text-3xl font-bold text-black mb-2">24/7</div>
+				<div class="text-black text-sm font-medium">Monitoring</div>
 			</div>
 		</div>
 		<!-- Features Section -->
 		<div class="mb-12">
-			<h2 class="text-3xl font-bold text-center mb-8 text-gray-800">
-				<i class="fas fa-star text-yellow-500 mr-2"></i>Key Features
+			<h2 class="text-3xl font-bold text-center mb-8 text-yellow-400">
+				Key Features
 			</h2>
 			<div class="grid md:grid-cols-3 gap-8">
-				<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition">
-					<div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-						<i class="fas fa-robot text-3xl text-blue-600"></i>
+				<div class="bg-black border-4 border-yellow-400 shadow-lg p-8">
+					<div class="bg-yellow-400 w-16 h-16 flex items-center justify-center mb-4">
+						<i class="fas fa-robot text-3xl text-black"></i>
 					</div>
-					<h3 class="text-xl font-bold mb-3 text-gray-800">Model Scanning</h3>
-					<p class="text-gray-600 mb-4">Scan ML model files, configurations, and metadata for embedded secrets, API keys, and credentials.</p>
-					<ul class="text-sm text-gray-600 space-y-2">
-						<li><i class="fas fa-check text-green-500 mr-2"></i>PyTorch & TensorFlow</li>
-						<li><i class="fas fa-check text-green-500 mr-2"></i>Config files</li>
-						<li><i class="fas fa-check text-green-500 mr-2"></i>Model cards</li>
+					<h3 class="text-xl font-bold mb-3 text-yellow-400">Model Scanning</h3>
+					<p class="text-white mb-4">Scan ML model files, configurations, and metadata for embedded secrets, API keys, and credentials.</p>
+					<ul class="text-sm text-white space-y-2">
+						<li><i class="fas fa-check text-yellow-400 mr-2"></i>PyTorch & TensorFlow</li>
+						<li><i class="fas fa-check text-yellow-400 mr-2"></i>Config files</li>
+						<li><i class="fas fa-check text-yellow-400 mr-2"></i>Model cards</li>
 					</ul>
 				</div>
-				<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition">
-					<div class="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-						<i class="fas fa-database text-3xl text-green-600"></i>
+				<div class="bg-black border-4 border-yellow-400 shadow-lg p-8">
+					<div class="bg-yellow-400 w-16 h-16 flex items-center justify-center mb-4">
+						<i class="fas fa-database text-3xl text-black"></i>
 					</div>
-					<h3 class="text-xl font-bold mb-3 text-gray-800">Dataset Analysis</h3>
-					<p class="text-gray-600 mb-4">Deep analysis of datasets for sensitive information, PII, and data leaks across multiple formats.</p>
-					<ul class="text-sm text-gray-600 space-y-2">
-						<li><i class="fas fa-check text-green-500 mr-2"></i>CSV, JSON, Parquet</li>
-						<li><i class="fas fa-check text-green-500 mr-2"></i>Text & Image data</li>
-						<li><i class="fas fa-check text-green-500 mr-2"></i>Metadata scanning</li>
+					<h3 class="text-xl font-bold mb-3 text-yellow-400">Dataset Analysis</h3>
+					<p class="text-white mb-4">Deep analysis of datasets for sensitive information, PII, and data leaks across multiple formats.</p>
+					<ul class="text-sm text-white space-y-2">
+						<li><i class="fas fa-check text-yellow-400 mr-2"></i>CSV, JSON, Parquet</li>
+						<li><i class="fas fa-check text-yellow-400 mr-2"></i>Text & Image data</li>
+						<li><i class="fas fa-check text-yellow-400 mr-2"></i>Metadata scanning</li>
 					</ul>
 				</div>
-				<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition">
-					<div class="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-						<i class="fas fa-rocket text-3xl text-purple-600"></i>
+				<div class="bg-black border-4 border-yellow-400 shadow-lg p-8">
+					<div class="bg-yellow-400 w-16 h-16 flex items-center justify-center mb-4">
+						<i class="fas fa-rocket text-3xl text-black"></i>
 					</div>
-					<h3 class="text-xl font-bold mb-3 text-gray-800">Space Security</h3>
-					<p class="text-gray-600 mb-4">Comprehensive security checks for Hugging Face Spaces, including code and dependencies.</p>
-					<ul class="text-sm text-gray-600 space-y-2">
-						<li><i class="fas fa-check text-green-500 mr-2"></i>Gradio & Streamlit</li>
-						<li><i class="fas fa-check text-green-500 mr-2"></i>Environment variables</li>
-						<li><i class="fas fa-check text-green-500 mr-2"></i>Dependency checks</li>
+					<h3 class="text-xl font-bold mb-3 text-yellow-400">Space Security</h3>
+					<p class="text-white mb-4">Comprehensive security checks for Hugging Face Spaces, including code and dependencies.</p>
+					<ul class="text-sm text-white space-y-2">
+						<li><i class="fas fa-check text-yellow-400 mr-2"></i>Gradio & Streamlit</li>
+						<li><i class="fas fa-check text-yellow-400 mr-2"></i>Environment variables</li>
+						<li><i class="fas fa-check text-yellow-400 mr-2"></i>Dependency checks</li>
 					</ul>
 				</div>
 			</div>
 		</div>
 		<!-- Detection Patterns -->
 		<div class="mb-12">
-			<h2 class="text-3xl font-bold text-center mb-8 text-gray-800">
-				<i class="fas fa-shield-virus text-red-600 mr-2"></i>Detection Patterns
+			<h2 class="text-3xl font-bold text-center mb-8 text-yellow-400">
+				Detection Patterns
 			</h2>
-			<div class="bg-white rounded-xl shadow-lg p-8">
+			<div class="bg-black border-4 border-yellow-400 shadow-lg p-8">
 				<div class="grid md:grid-cols-3 gap-6">
 					<div>
-						<h4 class="font-bold text-gray-800 mb-3 flex items-center">
-							<i class="fas fa-key text-yellow-500 mr-2"></i>API Keys & Tokens
+						<h4 class="font-bold text-yellow-400 mb-3 flex items-center">
+							API Keys & Tokens
 						</h4>
-						<ul class="text-sm text-gray-600 space-y-2">
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>AWS Access Keys</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>GitHub Tokens</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>Google API Keys</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>Stripe Keys</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>SendGrid Keys</li>
+						<ul class="text-sm text-white space-y-2">
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>AWS Access Keys</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>GitHub Tokens</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>Google API Keys</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>Stripe Keys</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>SendGrid Keys</li>
 						</ul>
 					</div>
 					<div>
-						<h4 class="font-bold text-gray-800 mb-3 flex items-center">
-							<i class="fas fa-lock text-red-500 mr-2"></i>Credentials & Secrets
+						<h4 class="font-bold text-yellow-400 mb-3 flex items-center">
+							Credentials & Secrets
 						</h4>
-						<ul class="text-sm text-gray-600 space-y-2">
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>Private Keys (RSA/SSH)</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>Database Passwords</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>OAuth Tokens</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>JWT Tokens</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>Connection Strings</li>
+						<ul class="text-sm text-white space-y-2">
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>Private Keys (RSA/SSH)</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>Database Passwords</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>OAuth Tokens</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>JWT Tokens</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>Connection Strings</li>
 						</ul>
 					</div>
 					<div>
-						<h4 class="font-bold text-gray-800 mb-3 flex items-center">
-							<i class="fas fa-user-shield text-green-500 mr-2"></i>Sensitive Data
+						<h4 class="font-bold text-yellow-400 mb-3 flex items-center">
+							Sensitive Data
 						</h4>
-						<ul class="text-sm text-gray-600 space-y-2">
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>Email Addresses</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>IP Addresses</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>Phone Numbers</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>Credit Cards</li>
-							<li><i class="fas fa-angle-right text-blue-500 mr-2"></i>Social Security Numbers</li>
+						<ul class="text-sm text-white space-y-2">
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>Email Addresses</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>IP Addresses</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>Phone Numbers</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>Credit Cards</li>
+							<li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>Social Security Numbers</li>
 						</ul>
 					</div>
 				</div>
@@ -134,38 +133,38 @@ templ IndexNew() {
 		</div>
 		<!-- How It Works -->
 		<div class="mb-12">
-			<h2 class="text-3xl font-bold text-center mb-8 text-gray-800">
-				<i class="fas fa-cogs text-blue-600 mr-2"></i>How It Works
+			<h2 class="text-3xl font-bold text-center mb-8 text-yellow-400">
+				How It Works
 			</h2>
 			<div class="grid md:grid-cols-4 gap-6">
 				<div class="text-center">
-					<div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">1</div>
-					<h4 class="font-bold text-gray-800 mb-2">Select Resource</h4>
-					<p class="text-sm text-gray-600">Choose model, dataset, or space to scan</p>
+					<div class="bg-yellow-400 text-black w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">1</div>
+					<h4 class="font-bold text-yellow-400 mb-2">Select Resource</h4>
+					<p class="text-sm text-white">Choose model, dataset, or space to scan</p>
 				</div>
 				<div class="text-center">
-					<div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">2</div>
-					<h4 class="font-bold text-gray-800 mb-2">Initiate Scan</h4>
-					<p class="text-sm text-gray-600">Enter resource ID and start scanning</p>
+					<div class="bg-yellow-400 text-black w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">2</div>
+					<h4 class="font-bold text-yellow-400 mb-2">Initiate Scan</h4>
+					<p class="text-sm text-white">Enter resource ID and start scanning</p>
 				</div>
 				<div class="text-center">
-					<div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">3</div>
-					<h4 class="font-bold text-gray-800 mb-2">Analyze Results</h4>
-					<p class="text-sm text-gray-600">AI-powered detection of secrets and vulnerabilities</p>
+					<div class="bg-yellow-400 text-black w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">3</div>
+					<h4 class="font-bold text-yellow-400 mb-2">Analyze Results</h4>
+					<p class="text-sm text-white">AI-powered detection of secrets and vulnerabilities</p>
 				</div>
 				<div class="text-center">
-					<div class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">4</div>
-					<h4 class="font-bold text-gray-800 mb-2">Take Action</h4>
-					<p class="text-sm text-gray-600">Review findings and remediate issues</p>
+					<div class="bg-yellow-400 text-black w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">4</div>
+					<h4 class="font-bold text-yellow-400 mb-2">Take Action</h4>
+					<p class="text-sm text-white">Review findings and remediate issues</p>
 				</div>
 			</div>
 		</div>
 		<!-- CTA Section -->
-		<div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-2xl p-12 text-center text-white">
-			<h2 class="text-3xl font-bold mb-4">Ready to Secure Your AI Resources?</h2>
-			<p class="text-xl mb-8 text-blue-100">Start scanning now and protect your models, datasets, and spaces from security threats.</p>
-			<a href="/scan" class="bg-white text-blue-600 hover:bg-blue-50 font-bold py-4 px-10 rounded-xl text-lg transition transform hover:scale-105 shadow-lg inline-block">
-				<i class="fas fa-rocket mr-2"></i>Launch Your First Scan
+		<div class="bg-black border-4 border-yellow-400 shadow-2xl p-12 text-center">
+			<h2 class="text-3xl font-bold mb-4 text-white">Ready to Secure Your AI Resources?</h2>
+			<p class="text-xl mb-8 text-white">Start scanning now and protect your models, datasets, and spaces from security threats.</p>
+			<a href="/scan" class="bg-yellow-400 text-black hover:bg-yellow-500 font-bold py-4 px-10 text-lg transition shadow-lg inline-block">
+				Launch Your First Scan
 			</a>
 		</div>
 	}

@@ -3,100 +3,98 @@ package template
 import "github.com/MishraShardendu22/Scanner/models"
 import "fmt"
 
-templ ResultsListNew(results []models.SCAN_RESULT) {
+templ ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages int) {
 	@Layout("Scan Results") {
-		<div class="max-w-7xl mx-auto">
+		<div class="w-full">
 			<!-- Header -->
-			<div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-lg p-8 mb-8 text-white">
+			<div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-8 text-white">
 				<h1 class="text-4xl font-bold mb-2">
-					<i class="fas fa-list-alt mr-3"></i>Scan Results
+					Scan Results
 				</h1>
-				<p class="text-purple-100">View and manage all your security scan results</p>
+				<p class="text-white">View and manage all your security scan results</p>
 			</div>
 			<!-- Stats Overview -->
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-				<div class="bg-white rounded-xl shadow-md p-6">
+				<div class="bg-black border-4 border-yellow-400 shadow-md p-6">
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-gray-600 text-sm font-medium">Total Scans</p>
-							<p class="text-3xl font-bold text-blue-600 mt-2">{ fmt.Sprintf("%d", len(results)) }</p>
+							<p class="text-white text-sm font-medium">Total Scans</p>
+							<p class="text-3xl font-bold text-yellow-400 mt-2">{ fmt.Sprintf("%d", len(results)) }</p>
 						</div>
-						<div class="bg-blue-100 rounded-full p-3">
-							<i class="fas fa-search text-2xl text-blue-600"></i>
+						<div class="bg-yellow-400 p-3">
+							<i class="fas fa-search text-2xl text-black"></i>
 						</div>
 					</div>
 				</div>
-				<div class="bg-white rounded-xl shadow-md p-6">
+				<div class="bg-black border-4 border-yellow-400 shadow-md p-6">
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-gray-600 text-sm font-medium">Total Resources</p>
-							<p class="text-3xl font-bold text-green-600 mt-2">{ fmt.Sprintf("%d", countTotalResources(results)) }</p>
+							<p class="text-white text-sm font-medium">Total Resources</p>
+							<p class="text-3xl font-bold text-yellow-400 mt-2">{ fmt.Sprintf("%d", countTotalResources(results)) }</p>
 						</div>
-						<div class="bg-green-100 rounded-full p-3">
-							<i class="fas fa-database text-2xl text-green-600"></i>
+						<div class="bg-yellow-400 p-3">
+							<i class="fas fa-database text-2xl text-black"></i>
 						</div>
 					</div>
 				</div>
-				<div class="bg-white rounded-xl shadow-md p-6">
+				<div class="bg-black border-4 border-yellow-400 shadow-md p-6">
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-gray-600 text-sm font-medium">Total Findings</p>
-							<p class="text-3xl font-bold text-red-600 mt-2">{ fmt.Sprintf("%d", countTotalFindingsInList(results)) }</p>
+							<p class="text-white text-sm font-medium">Total Findings</p>
+							<p class="text-3xl font-bold text-yellow-400 mt-2">{ fmt.Sprintf("%d", countTotalFindingsInList(results)) }</p>
 						</div>
-						<div class="bg-red-100 rounded-full p-3">
-							<i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+						<div class="bg-yellow-400 p-3">
+							<i class="fas fa-exclamation-triangle text-2xl text-black"></i>
 						</div>
 					</div>
 				</div>
 			</div>
 			<!-- Actions Bar -->
-			<div class="bg-white rounded-xl shadow-md p-4 mb-6 flex items-center justify-between">
+			<div class="bg-black border-4 border-yellow-400 shadow-md p-4 mb-6 flex items-center justify-between">
 				<div class="flex items-center space-x-4">
-					<button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
-						<i class="fas fa-sync-alt mr-2"></i>Refresh
+					<button onclick="location.reload()" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 transition">
+						Refresh
 					</button>
-					<a href="/scan" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">
-						<i class="fas fa-plus mr-2"></i>New Scan
+					<a href="/scan" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 transition">
+						New Scan
 					</a>
 				</div>
-				<div class="text-sm text-gray-600">
-					<i class="fas fa-clock mr-1"></i>Last updated: <span id="lastUpdate">{ getCurrentTime() }</span>
+				<div class="text-sm text-white">
+					Last updated: <span id="lastUpdate">{ getCurrentTime() }</span>
 				</div>
 			</div>
 			<!-- Results List -->
 			if len(results) == 0 {
-				<div class="bg-white rounded-xl shadow-lg p-12 text-center">
-					<div class="text-6xl text-gray-300 mb-4">
+				<div class="bg-black border-4 border-yellow-400 shadow-lg p-12 text-center">
+					<div class="text-6xl text-yellow-400 mb-4">
 						<i class="fas fa-inbox"></i>
 					</div>
-					<h2 class="text-2xl font-bold text-gray-800 mb-2">No Scans Found</h2>
-					<p class="text-gray-600 mb-6">Start your first security scan to see results here</p>
-					<a href="/scan" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition">
-						<i class="fas fa-play mr-2"></i>Start Your First Scan
+					<h2 class="text-2xl font-bold text-white mb-2">No Scans Found</h2>
+					<p class="text-white mb-6">Start your first security scan to see results here</p>
+					<a href="/scan" class="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-8 transition">
+						Start Your First Scan
 					</a>
 				</div>
 			} else {
 				<div class="space-y-4">
 					for _, result := range results {
-						<div class="bg-white rounded-xl shadow-md hover:shadow-xl transition border-l-4 border-blue-600">
+						<div class="bg-black border-4 border-yellow-400 shadow-md hover:shadow-xl transition">
 							<div class="p-6">
 								<div class="flex items-start justify-between mb-4">
 									<div class="flex-1">
 										<div class="flex items-center space-x-3 mb-2">
-											<span class="text-lg font-bold text-gray-800">
-												<i class="fas fa-fingerprint text-blue-600 mr-2"></i>
+											<span class="text-lg font-bold text-white">
 												{ result.RequestID }
 											</span>
-											<span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+											<span class="px-3 py-1 bg-yellow-400 text-black text-xs font-semibold">
 												{ fmt.Sprintf("%d resources", len(result.ScannedResources)) }
 											</span>
 										</div>
-										<div class="text-sm text-gray-600">
-											<i class="fas fa-calendar text-gray-400 mr-1"></i>
+										<div class="text-sm text-white">
 											{ result.CreatedAt.Format("Jan 02, 2006 15:04:05") }
 										</div>
 									</div>
-									<a href={ templ.URL(fmt.Sprintf("/results/%s", result.RequestID)) } class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition flex items-center space-x-2">
+									<a href={ templ.URL(fmt.Sprintf("/results/%s", result.RequestID)) } class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition flex items-center space-x-2">
 										<i class="fas fa-eye"></i>
 										<span>View Details</span>
 									</a>
@@ -120,6 +118,54 @@ templ ResultsListNew(results []models.SCAN_RESULT) {
 						</div>
 					}
 				</div>
+				<!-- Pagination -->
+				if totalPages > 1 {
+					<div class="bg-black border-4 border-yellow-400 shadow-md p-4 mt-6">
+						<div class="flex items-center justify-between">
+							<div class="text-white text-sm">
+								Page { fmt.Sprintf("%d", currentPage) } of { fmt.Sprintf("%d", totalPages) }
+							</div>
+							<div class="flex items-center space-x-2">
+								if currentPage > 1 {
+									<a href={ templ.URL(fmt.Sprintf("/results?page=%d", currentPage-1)) } class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 transition">
+										<i class="fas fa-chevron-left"></i>
+									</a>
+								} else {
+									<span class="bg-black border-2 border-yellow-400 text-yellow-400 py-2 px-4 cursor-not-allowed opacity-50">
+										<i class="fas fa-chevron-left"></i>
+									</span>
+								}
+								
+								<!-- Page Numbers -->
+								<div class="flex items-center space-x-1">
+									for i := 1; i <= totalPages; i++ {
+										if i == currentPage {
+											<span class="bg-yellow-400 text-black font-bold py-2 px-4">
+												{ fmt.Sprintf("%d", i) }
+											</span>
+										} else if i == 1 || i == totalPages || (i >= currentPage-2 && i <= currentPage+2) {
+											<a href={ templ.URL(fmt.Sprintf("/results?page=%d", i)) } class="bg-black border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold py-2 px-4 transition">
+												{ fmt.Sprintf("%d", i) }
+											</a>
+										} else if i == currentPage-3 || i == currentPage+3 {
+											<span class="text-yellow-400 py-2 px-2">...</span>
+										}
+									}
+								</div>
+								
+								if currentPage < totalPages {
+									<a href={ templ.URL(fmt.Sprintf("/results?page=%d", currentPage+1)) } class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 transition">
+										<i class="fas fa-chevron-right"></i>
+									</a>
+								} else {
+									<span class="bg-black border-2 border-yellow-400 text-yellow-400 py-2 px-4 cursor-not-allowed opacity-50">
+										<i class="fas fa-chevron-right"></i>
+									</span>
+								}
+							</div>
+						</div>
+					</div>
+				}
 			}
 		</div>
 		<script>
@@ -170,170 +216,168 @@ func getCurrentTime() string {
 
 templ ResultDetailNew(result models.SCAN_RESULT) {
 	@Layout("Scan Result Details") {
-		<div class="max-w-7xl mx-auto">
+		<div class="w-full">
 			<!-- Header -->
-			<div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg p-8 mb-8 text-white">
+			<div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-8">
 				<div class="flex items-center justify-between mb-4">
 					<div>
-						<h1 class="text-4xl font-bold mb-2">
-							<i class="fas fa-file-alt mr-3"></i>Scan Details
+						<h1 class="text-4xl font-bold mb-2 text-yellow-400">
+							Scan Details
 						</h1>
-						<p class="text-blue-100">Request ID: { result.RequestID }</p>
+						<p class="text-white">Request ID: { result.RequestID }</p>
 					</div>
-					<a href="/results" class="bg-white hover:bg-blue-50 text-blue-600 font-bold py-3 px-6 rounded-lg transition">
-						<i class="fas fa-arrow-left mr-2"></i>Back to Results
+					<a href="/results" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 transition">
+						Back to Results
 					</a>
 				</div>
-				<div class="flex items-center space-x-6 text-sm">
+				<div class="flex items-center space-x-6 text-sm text-white">
 					<div>
-						<i class="fas fa-calendar mr-2"></i>
+						<i class="fas fa-calendar mr-2 text-yellow-400"></i>
 						{ result.CreatedAt.Format("Monday, Jan 02, 2006 at 15:04:05") }
 					</div>
 					<div>
-						<i class="fas fa-database mr-2"></i>
+						<i class="fas fa-database mr-2 text-yellow-400"></i>
 						{ fmt.Sprintf("%d resources scanned", len(result.ScannedResources)) }
 					</div>
 				</div>
 			</div>
 			<!-- Summary Cards -->
 			<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-				<div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-lg p-6">
+				<div class="bg-black border-4 border-yellow-400 shadow-lg p-6">
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-blue-100 text-sm">Resources Scanned</p>
-							<p class="text-3xl font-bold mt-2">{ fmt.Sprintf("%d", len(result.ScannedResources)) }</p>
+							<p class="text-white text-sm">Resources Scanned</p>
+							<p class="text-3xl font-bold mt-2 text-yellow-400">{ fmt.Sprintf("%d", len(result.ScannedResources)) }</p>
 						</div>
-						<i class="fas fa-layer-group text-4xl opacity-30"></i>
+						<i class="fas fa-layer-group text-4xl text-yellow-400"></i>
 					</div>
 				</div>
-				<div class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl shadow-lg p-6">
+				<div class="bg-black border-4 border-yellow-400 shadow-lg p-6">
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-red-100 text-sm">Total Findings</p>
-							<p class="text-3xl font-bold mt-2">{ fmt.Sprintf("%d", countFindings(result)) }</p>
+							<p class="text-white text-sm">Total Findings</p>
+							<p class="text-3xl font-bold mt-2 text-yellow-400">{ fmt.Sprintf("%d", countFindings(result)) }</p>
 						</div>
-						<i class="fas fa-exclamation-circle text-4xl opacity-30"></i>
+						<i class="fas fa-exclamation-circle text-4xl text-yellow-400"></i>
 					</div>
 				</div>
-				<div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl shadow-lg p-6">
+				<div class="bg-black border-4 border-yellow-400 shadow-lg p-6">
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-yellow-100 text-sm">Resource Types</p>
-							<p class="text-3xl font-bold mt-2">{ getResourceTypes(result) }</p>
+							<p class="text-white text-sm">Resource Types</p>
+							<p class="text-3xl font-bold mt-2 text-yellow-400">{ getResourceTypes(result) }</p>
 						</div>
-						<i class="fas fa-sitemap text-4xl opacity-30"></i>
+						<i class="fas fa-sitemap text-4xl text-yellow-400"></i>
 					</div>
 				</div>
-				<div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-lg p-6">
+				<div class="bg-black border-4 border-yellow-400 shadow-lg p-6">
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-purple-100 text-sm">Status</p>
-							<p class="text-xl font-bold mt-2">Complete</p>
+							<p class="text-white text-sm">Status</p>
+							<p class="text-xl font-bold mt-2 text-yellow-400">Complete</p>
 						</div>
-						<i class="fas fa-check-circle text-4xl opacity-30"></i>
+						<i class="fas fa-check-circle text-4xl text-yellow-400"></i>
 					</div>
 				</div>
 			</div>
 			<!-- Scanned Resources -->
 			<div class="space-y-6">
 				for i, resource := range result.ScannedResources {
-					<div class="bg-white rounded-xl shadow-lg overflow-hidden">
-						<div class="bg-gradient-to-r from-gray-700 to-gray-800 text-white p-6">
+					<div class="bg-black border-4 border-yellow-400 shadow-lg overflow-hidden">
+						<div class="bg-black border-b-4 border-yellow-400 p-6">
 							<div class="flex items-center justify-between">
 								<div>
-									<h2 class="text-2xl font-bold mb-2">
-										<i class="fas fa-cube mr-2"></i>
+									<h2 class="text-2xl font-bold mb-2 text-yellow-400">
 										Resource #{ fmt.Sprintf("%d", i+1) }
 									</h2>
 									<div class="flex items-center space-x-4 text-sm">
-										<span class="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+										<span class="bg-yellow-400 text-black px-3 py-1 font-bold">
 											<i class="fas fa-tag mr-1"></i>{ resource.Type }
 										</span>
-										<span class="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+										<span class="bg-yellow-400 text-black px-3 py-1 font-bold">
 											<i class="fas fa-fingerprint mr-1"></i>{ resource.ID }
 										</span>
 									</div>
 								</div>
 								<div class="text-right">
-									<div class="text-3xl font-bold">{ fmt.Sprintf("%d", len(resource.Findings)) }</div>
-									<div class="text-sm text-gray-300">Findings</div>
+									<div class="text-3xl font-bold text-yellow-400">{ fmt.Sprintf("%d", len(resource.Findings)) }</div>
+									<div class="text-sm text-white">Findings</div>
 								</div>
 							</div>
 						</div>
 						<div class="p-6">
 							if len(resource.Findings) == 0 {
 								<div class="text-center py-8">
-									<i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
-									<p class="text-xl font-bold text-gray-800">No Security Issues Found</p>
-									<p class="text-gray-600">This resource passed all security checks</p>
+									<i class="fas fa-check-circle text-6xl text-yellow-400 mb-4"></i>
+									<p class="text-xl font-bold text-white">No Security Issues Found</p>
+									<p class="text-white">This resource passed all security checks</p>
 								</div>
 							} else {
 								<div class="space-y-4">
 									for j, finding := range resource.Findings {
-										<div class="border-l-4 border-red-500 bg-red-50 rounded-lg p-6 hover:shadow-md transition">
+										<div class="border-l-4 border-yellow-400 bg-black border-2 border-yellow-400 p-6">
 											<div class="flex items-start justify-between mb-3">
 												<div class="flex-1">
 													<div class="flex items-center space-x-3 mb-2">
-														<span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+														<span class="bg-yellow-400 text-black px-3 py-1 text-sm font-bold">
 															Finding #{ fmt.Sprintf("%d", j+1) }
 														</span>
-														<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
+														<span class="bg-yellow-400 text-black px-3 py-1 text-sm font-semibold">
 															{ finding.SecretType }
 														</span>
 													</div>
-													<h3 class="text-lg font-bold text-gray-800 mb-2">
-														<i class="fas fa-shield-alt text-red-600 mr-2"></i>
+													<h3 class="text-lg font-bold text-yellow-400 mb-2">
 														{ finding.SecretType }
 													</h3>
 												</div>
 											</div>
 											<div class="grid md:grid-cols-2 gap-4 mb-4">
 												<div>
-													<p class="text-sm font-semibold text-gray-700 mb-1">
-														<i class="fas fa-code text-blue-600 mr-1"></i>Pattern:
+													<p class="text-sm font-semibold text-yellow-400 mb-1">
+														Pattern:
 													</p>
-													<code class="bg-white px-3 py-2 rounded border border-gray-300 text-sm block overflow-x-auto">
+													<code class="bg-black border border-yellow-400 text-white px-3 py-2 text-sm block overflow-x-auto">
 														{ finding.Pattern }
 													</code>
 												</div>
 												<div>
-													<p class="text-sm font-semibold text-gray-700 mb-1">
-														<i class="fas fa-key text-yellow-600 mr-1"></i>Exposed Secret:
+													<p class="text-sm font-semibold text-yellow-400 mb-1">
+														Exposed Secret:
 													</p>
-													<code class="bg-gray-900 text-green-400 px-3 py-2 rounded text-sm block overflow-x-auto">
+													<code class="bg-black border border-yellow-400 text-yellow-400 px-3 py-2 text-sm block overflow-x-auto">
 														{ maskSecret(finding.Secret) }
 													</code>
 												</div>
 											</div>
 											<div class="grid md:grid-cols-2 gap-4">
 												<div>
-													<p class="text-sm font-semibold text-gray-700 mb-1">
-														<i class="fas fa-layer-group text-purple-600 mr-1"></i>Source Type:
+													<p class="text-sm font-semibold text-yellow-400 mb-1">
+														Source Type:
 													</p>
-													<p class="text-sm text-gray-800">{ finding.SourceType }</p>
+													<p class="text-sm text-white">{ finding.SourceType }</p>
 												</div>
 												if finding.FileName != "" {
 													<div>
-														<p class="text-sm font-semibold text-gray-700 mb-1">
-															<i class="fas fa-file text-green-600 mr-1"></i>File:
+														<p class="text-sm font-semibold text-yellow-400 mb-1">
+															File:
 														</p>
-														<p class="text-sm text-gray-800 font-mono">{ finding.FileName }</p>
+														<p class="text-sm text-white font-mono">{ finding.FileName }</p>
 													</div>
 												}
 												if finding.Line > 0 {
 													<div>
-														<p class="text-sm font-semibold text-gray-700 mb-1">
-															<i class="fas fa-hashtag text-blue-600 mr-1"></i>Line:
+														<p class="text-sm font-semibold text-yellow-400 mb-1">
+															Line:
 														</p>
-														<p class="text-sm text-gray-800">{ fmt.Sprintf("%d", finding.Line) }</p>
+														<p class="text-sm text-white">{ fmt.Sprintf("%d", finding.Line) }</p>
 													</div>
 												}
 												if finding.DiscussionNum > 0 {
 													<div>
-														<p class="text-sm font-semibold text-gray-700 mb-1">
-															<i class="fas fa-comments text-indigo-600 mr-1"></i>Discussion:
+														<p class="text-sm font-semibold text-yellow-400 mb-1">
+															Discussion:
 														</p>
-														<p class="text-sm text-gray-800">
+														<p class="text-sm text-white">
 															#{ fmt.Sprintf("%d", finding.DiscussionNum) } - { finding.DiscussionTitle }
 														</p>
 													</div>

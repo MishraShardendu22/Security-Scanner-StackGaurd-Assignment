@@ -54,11 +54,7 @@ func GetDashboardStats(c *fiber.Ctx) error {
 				for _, finding := range resource.Findings {
 					if finding.SecretType != "" {
 						stats.FindingsByType[finding.SecretType]++
-					}
-
-					// Count high severity findings based on secret type
-					// You can customize this based on your severity logic
-					if finding.SecretType == "AWS Access Key" || finding.SecretType == "Private Key" {
+						// All findings are considered critical by default since they are all security secrets
 						stats.HighSeverityFindings++
 					}
 				}
