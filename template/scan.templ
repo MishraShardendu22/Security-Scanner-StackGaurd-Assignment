@@ -7,7 +7,12 @@ templ ScanForm() {
 <h2 class="text-3xl font-bold mb-6 text-yellow-400">
 Start New Security Scan
 </h2>
-<form id="scanForm">
+<form id="scanForm" 
+	hx-post="/scan" 
+	hx-trigger="submit" 
+	hx-target="#scanResults" 
+	hx-swap="innerHTML"
+	hx-indicator="#loadingSpinner">
 <!-- Two Column Layout -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 	<!-- Left Column - Resource Type Selection -->
@@ -92,7 +97,7 @@ Start New Security Scan
 </div>
 </div>
 <!-- Loading Spinner -->
-<div id="loadingSpinner" class="mt-8 text-center hidden">
+<div id="loadingSpinner" class="mt-8 text-center htmx-indicator">
 <div class="inline-block rounded-full h-12 w-12 border-4 border-gray-700 border-t-yellow-400" style="animation: spin 1s linear infinite;"></div>
 <p class="mt-4 text-gray-300 font-medium">Scanning in progress...</p>
 </div>

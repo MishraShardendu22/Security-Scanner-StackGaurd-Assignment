@@ -9,43 +9,60 @@ templ ResultsList(results []models.SCAN_RESULT) {
 	@Layout("Scan Results") {
 		<div class="max-w-6xl mx-auto">
 			<div class="bg-black border-4 border-yellow-400 rounded-lg shadow-lg p-8">
-				<h2 class="text-3xl font-bold mb-6 text-yellow-400">
-					<i class="fas fa-list-alt mr-3 text-yellow-400"></i>All Scan Results
-				</h2>
-				if len(results) == 0 {
-					<div class="text-center py-12">
-						<i class="fas fa-inbox text-6xl text-gray-600 mb-4"></i>
-						<p class="text-xl text-gray-400 mb-4">No scan results found</p>
-						<a href="/scan" class="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition">
-							<i class="fas fa-play mr-2"></i>Start New Scan
-						</a>
-					</div>
-				} else {
-					<div class="grid gap-6">
-						for _, result := range results {
-							<div class="border-l-4 border-yellow-400 bg-gray-900 rounded-r-lg p-6">
-								<div class="flex items-center justify-between mb-4">
-									<div>
-										<h3 class="text-xl font-bold text-yellow-400">Request ID: { result.RequestID }</h3>
-										<p class="text-sm text-gray-400 mt-1">Created: { result.CreatedAt.Format("2006-01-02 15:04:05") }</p>
+				<div class="flex items-center justify-between mb-6">
+					<h2 class="text-3xl font-bold text-yellow-400">
+						<i class="fas fa-list-alt mr-3 text-yellow-400"></i>All Scan Results
+					</h2>
+					<button 
+						hx-get="/results" 
+						hx-trigger="click" 
+						hx-target="#resultsContainer"
+						hx-swap="innerHTML"
+						class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-4 py-2 transition">
+						<i class="fas fa-sync-alt mr-2"></i>Refresh
+					</button>
+				</div>
+				<div id="resultsContainer"
+					hx-get="/results"
+					hx-trigger="every 10s"
+					hx-swap="innerHTML"
+					hx-select="#resultsContainer">
+
+					if len(results) == 0 {
+						<div class="text-center py-12">
+							<i class="fas fa-inbox text-6xl text-gray-600 mb-4"></i>
+							<p class="text-xl text-gray-400 mb-4">No scan results found</p>
+							<a href="/scan" class="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition">
+								<i class="fas fa-play mr-2"></i>Start New Scan
+							</a>
+						</div>
+					} else {
+						<div class="grid gap-6">
+							for _, result := range results {
+								<div class="border-l-4 border-yellow-400 bg-gray-900 rounded-r-lg p-6">
+									<div class="flex items-center justify-between mb-4">
+										<div>
+											<h3 class="text-xl font-bold text-yellow-400">Request ID: { result.RequestID }</h3>
+											<p class="text-sm text-gray-400 mt-1">Created: { result.CreatedAt.Format("2006-01-02 15:04:05") }</p>
+										</div>
+										<a href={ templ.URL(fmt.Sprintf("/results/%s", result.RequestID)) } class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg transition">
+											<i class="fas fa-eye mr-2"></i>View Details
+										</a>
 									</div>
-									<a href={ templ.URL(fmt.Sprintf("/results/%s", result.RequestID)) } class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg transition">
-										<i class="fas fa-eye mr-2"></i>View Details
-									</a>
+									<div class="flex items-center space-x-4 text-sm">
+										<span class="text-gray-300 font-medium">
+											<i class="fas fa-folder mr-2 text-yellow-400"></i>{ fmt.Sprintf("%d", len(result.ScannedResources)) } Resources
+										</span>
+										<span class="text-gray-300 font-medium">
+											<i class="fas fa-exclamation-triangle mr-2 text-yellow-400"></i>
+											{ fmt.Sprintf("%d", countTotalFindings(result.ScannedResources)) } Findings
+										</span>
+									</div>
 								</div>
-								<div class="flex items-center space-x-4 text-sm">
-									<span class="text-gray-300 font-medium">
-										<i class="fas fa-folder mr-2 text-yellow-400"></i>{ fmt.Sprintf("%d", len(result.ScannedResources)) } Resources
-									</span>
-									<span class="text-gray-300 font-medium">
-										<i class="fas fa-exclamation-triangle mr-2 text-yellow-400"></i>
-										{ fmt.Sprintf("%d", countTotalFindings(result.ScannedResources)) } Findings
-									</span>
-								</div>
-							</div>
-						}
-					</div>
-				}
+							}
+						</div>
+					}
+				</div>
 			</div>
 		</div>
 	}

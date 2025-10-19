@@ -168,9 +168,9 @@ func loadConfig() *models.Config {
 func setupMiddleware(app *fiber.App, config *models.Config) {
 
 	app.Use(recover.New(recover.Config{
-
 		EnableStackTrace: config.Environment == "development",
 	}))
+	
 	app.Use(cors.New(cors.Config{
 
 		AllowOrigins:  config.CorsAllowOrigins,
