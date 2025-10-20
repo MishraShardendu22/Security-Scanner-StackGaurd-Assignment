@@ -3,9 +3,9 @@ package template
 import (
 	"fmt"
 	"time"
+	"github.com/MishraShardendu22/Scanner/util"
 )
 
-// DashboardStatsPartial for HTMX updates
 templ DashboardStatsPartial(totalScans, totalFindings, totalResources, criticalIssues int) {
 	<div id="statsOverview" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
 		<div class="bg-black border-4 border-yellow-400 shadow-lg p-6">
@@ -81,7 +81,7 @@ templ RecentScansPartial(scans []RecentScanData) {
 						<div class="flex-1">
 							<div class="flex items-center space-x-3 mb-2">
 								<span class="text-sm font-mono text-yellow-400">{ scan.RequestID }</span>
-								<span class="text-xs text-white">{ formatTimeAgo(scan.CreatedAt) }</span>
+								<span class="text-xs text-white">{ util.FormatTimeAgo(scan.CreatedAt) }</span>
 							</div>
 							<div class="flex items-center space-x-4 text-sm">
 								<span class="text-white">
@@ -102,27 +102,4 @@ templ RecentScansPartial(scans []RecentScanData) {
 			}
 		}
 	</div>
-}
-
-func formatTimeAgo(t time.Time) string {
-	now := time.Now()
-	diff := now.Sub(t)
-	
-	minutes := int(diff.Minutes())
-	hours := int(diff.Hours())
-	days := int(diff.Hours() / 24)
-	
-	if minutes < 1 {
-		return "Just now"
-	}
-	if minutes < 60 {
-		return fmt.Sprintf("%dm ago", minutes)
-	}
-	if hours < 24 {
-		return fmt.Sprintf("%dh ago", hours)
-	}
-	if days < 7 {
-		return fmt.Sprintf("%dd ago", days)
-	}
-	return t.Format("Jan 2")
 }

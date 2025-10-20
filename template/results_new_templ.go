@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/MishraShardendu22/Scanner/models"
 import "fmt"
+import "github.com/MishraShardendu22/Scanner/util"
 
 func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -44,14 +45,14 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full\"><!-- Header --><div class=\"bg-black border-4 border-yellow-400 shadow-lg p-8 mb-8 text-white\"><h1 class=\"text-4xl font-bold mb-2\">Scan Results</h1><p class=\"text-white\">View and manage all your security scan results</p></div><!-- Stats Overview --><div class=\"grid grid-cols-1 md:grid-cols-3 gap-6 mb-8\"><div class=\"bg-black border-4 border-yellow-400 shadow-md p-6\"><div class=\"flex items-center justify-between\"><div><p class=\"text-white text-sm font-medium\">Total Scans</p><p class=\"text-3xl font-bold text-yellow-400 mt-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full\"><div class=\"bg-black border-4 border-yellow-400 shadow-lg p-8 mb-8 text-white\"><h1 class=\"text-4xl font-bold mb-2\">Scan Results</h1><p class=\"text-white\">View and manage all your security scan results</p></div><div class=\"grid grid-cols-1 md:grid-cols-3 gap-6 mb-8\"><div class=\"bg-black border-4 border-yellow-400 shadow-md p-6\"><div class=\"flex items-center justify-between\"><div><p class=\"text-white text-sm font-medium\">Total Scans</p><p class=\"text-3xl font-bold text-yellow-400 mt-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(results)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 22, Col: 91}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 21, Col: 91}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -62,9 +63,9 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", countTotalResources(results)))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", util.CountTotalResources(results)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 33, Col: 107}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 32, Col: 112}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -75,9 +76,9 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", countTotalFindingsInList(results)))
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", util.CountTotalFindingsInList(results)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 44, Col: 112}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 43, Col: 117}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -88,9 +89,9 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getCurrentTime())
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(util.GetCurrentTime())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 63, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 62, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -118,7 +119,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(result.RequestID)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 87, Col: 30}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 86, Col: 30}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -131,7 +132,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d resources", len(result.ScannedResources)))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 90, Col: 71}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 89, Col: 71}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -144,7 +145,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(result.CreatedAt.Format("Jan 02, 2006 15:04:05"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 94, Col: 61}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 93, Col: 61}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
@@ -157,7 +158,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 					var templ_7745c5c3_Var10 templ.SafeURL
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/results/%s", result.RequestID)))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 97, Col: 74}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 96, Col: 74}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
@@ -170,7 +171,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(result.ScannedResources)))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 105, Col: 106}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 104, Col: 106}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
@@ -181,9 +182,9 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var12 string
-					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", countFindings(result)))
+					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", util.CountFindings(result)))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 109, Col: 97}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 108, Col: 102}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -194,9 +195,9 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var13 string
-					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(getResourceTypes(result))
+					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(util.GetResourceTypes(result))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 113, Col: 84}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 112, Col: 89}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -219,7 +220,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", currentPage))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 126, Col: 45}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 125, Col: 45}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
@@ -232,7 +233,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 					var templ_7745c5c3_Var15 string
 					templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", totalPages))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 126, Col: 82}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 125, Col: 82}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 					if templ_7745c5c3_Err != nil {
@@ -250,7 +251,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 						var templ_7745c5c3_Var16 templ.SafeURL
 						templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/results?page=%d", currentPage-1)))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 130, Col: 76}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 129, Col: 76}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 						if templ_7745c5c3_Err != nil {
@@ -279,7 +280,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 							var templ_7745c5c3_Var17 string
 							templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 144, Col: 34}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 143, Col: 34}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 							if templ_7745c5c3_Err != nil {
@@ -297,7 +298,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 							var templ_7745c5c3_Var18 templ.SafeURL
 							templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/results?page=%d", i)))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 147, Col: 66}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 146, Col: 66}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 							if templ_7745c5c3_Err != nil {
@@ -310,7 +311,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 							var templ_7745c5c3_Var19 string
 							templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 148, Col: 34}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 147, Col: 34}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 							if templ_7745c5c3_Err != nil {
@@ -339,7 +340,7 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 						var templ_7745c5c3_Var20 templ.SafeURL
 						templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/results?page=%d", currentPage+1)))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 157, Col: 76}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 156, Col: 76}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 						if templ_7745c5c3_Err != nil {
@@ -373,42 +374,6 @@ func ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages in
 		}
 		return nil
 	})
-}
-
-func countFindings(result models.SCAN_RESULT) int {
-	count := 0
-	for _, resource := range result.ScannedResources {
-		count += len(resource.Findings)
-	}
-	return count
-}
-
-func countTotalResources(results []models.SCAN_RESULT) int {
-	count := 0
-	for _, result := range results {
-		count += len(result.ScannedResources)
-	}
-	return count
-}
-
-func countTotalFindingsInList(results []models.SCAN_RESULT) int {
-	count := 0
-	for _, result := range results {
-		count += countFindings(result)
-	}
-	return count
-}
-
-func getResourceTypes(result models.SCAN_RESULT) string {
-	typeMap := make(map[string]bool)
-	for _, resource := range result.ScannedResources {
-		typeMap[resource.Type] = true
-	}
-	return fmt.Sprintf("%d", len(typeMap))
-}
-
-func getCurrentTime() string {
-	return "Just now"
 }
 
 func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
@@ -451,7 +416,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(result.RequestID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 227, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 190, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -464,7 +429,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(result.CreatedAt.Format("Monday, Jan 02, 2006 at 15:04:05"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 236, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 199, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -477,7 +442,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d resources scanned", len(result.ScannedResources)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 240, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 203, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -490,7 +455,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(result.ScannedResources)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 250, Col: 107}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 213, Col: 107}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -501,9 +466,9 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var27 string
-			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", countFindings(result)))
+			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", util.CountFindings(result)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 259, Col: 100}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 222, Col: 105}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -514,9 +479,9 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var28 string
-			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(getResourceTypes(result))
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(util.GetResourceTypes(result))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 268, Col: 84}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 231, Col: 89}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -534,7 +499,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 				var templ_7745c5c3_Var29 string
 				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i+1))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 291, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 254, Col: 44}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 				if templ_7745c5c3_Err != nil {
@@ -547,7 +512,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(resource.Type)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 295, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 258, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 				if templ_7745c5c3_Err != nil {
@@ -560,7 +525,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 				var templ_7745c5c3_Var31 string
 				templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(resource.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 298, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 261, Col: 63}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 				if templ_7745c5c3_Err != nil {
@@ -573,7 +538,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 				var templ_7745c5c3_Var32 string
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(resource.Findings)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 303, Col: 100}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 266, Col: 100}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
@@ -601,7 +566,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 						var templ_7745c5c3_Var33 string
 						templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", j+1))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 323, Col: 48}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 286, Col: 48}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 						if templ_7745c5c3_Err != nil {
@@ -614,7 +579,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 						var templ_7745c5c3_Var34 string
 						templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(finding.SecretType)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 326, Col: 35}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 289, Col: 35}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 						if templ_7745c5c3_Err != nil {
@@ -627,7 +592,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 						var templ_7745c5c3_Var35 string
 						templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(finding.SecretType)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 330, Col: 34}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 293, Col: 34}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 						if templ_7745c5c3_Err != nil {
@@ -640,7 +605,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 						var templ_7745c5c3_Var36 string
 						templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(finding.Pattern)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 340, Col: 31}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 303, Col: 31}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 						if templ_7745c5c3_Err != nil {
@@ -651,9 +616,9 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var37 string
-						templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(maskSecret(finding.Secret))
+						templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(util.MaskSecret(finding.Secret))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 348, Col: 42}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 311, Col: 47}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 						if templ_7745c5c3_Err != nil {
@@ -666,7 +631,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 						var templ_7745c5c3_Var38 string
 						templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(finding.SourceType)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 357, Col: 63}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 320, Col: 63}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 						if templ_7745c5c3_Err != nil {
@@ -684,7 +649,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 							var templ_7745c5c3_Var39 string
 							templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(finding.FileName)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 364, Col: 72}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 327, Col: 72}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 							if templ_7745c5c3_Err != nil {
@@ -703,7 +668,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 							var templ_7745c5c3_Var40 string
 							templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", finding.Line))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 372, Col: 77}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 335, Col: 77}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 							if templ_7745c5c3_Err != nil {
@@ -722,7 +687,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 							var templ_7745c5c3_Var41 string
 							templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", finding.DiscussionNum))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 381, Col: 58}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 344, Col: 58}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 							if templ_7745c5c3_Err != nil {
@@ -735,7 +700,7 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 							var templ_7745c5c3_Var42 string
 							templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(finding.DiscussionTitle)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 381, Col: 88}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/results_new.templ`, Line: 344, Col: 88}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 							if templ_7745c5c3_Err != nil {
@@ -773,13 +738,6 @@ func ResultDetailNew(result models.SCAN_RESULT) templ.Component {
 		}
 		return nil
 	})
-}
-
-func maskSecret(secret string) string {
-	if len(secret) <= 8 {
-		return "****" + secret[len(secret)-4:]
-	}
-	return secret[:4] + "****" + secret[len(secret)-4:]
 }
 
 var _ = templruntime.GeneratedTemplate

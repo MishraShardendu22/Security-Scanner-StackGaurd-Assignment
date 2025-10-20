@@ -1,201 +1,155 @@
 package template
 
 import "strings"
-
-var defaultScanJSON = `{
-  "org": "huggingface",
-  "model_id": "bert-base-uncased",
-  "include_prs": false,
-  "include_discussions": false
-}`
-
-var defaultFetchModelJSON = `{
-  "org": "huggingface",
-  "model": "bert-base-uncased",
-  "include_prs": false,
-  "include_discussion": false
-}`
-
-var defaultFetchDatasetJSON = `{
-  "org": "huggingface",
-  "model": "squad",
-  "include_prs": false,
-  "include_discussion": false
-}`
+import "github.com/MishraShardendu22/Scanner/util"
 
 templ APITester() {
-	@Layout("API Tester") {
-		<div class="w-full">
-			<div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-6">
-				<h2 class="text-3xl font-bold mb-6 text-yellow-400">
-					API Endpoint Tester
-				</h2>
-				<p class="text-white mb-6">Test all API endpoints interactively and see live responses</p>
-			</div>
-			<div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-6">
-				<h3 class="text-2xl font-bold mb-4 text-yellow-400">
-					Scan Endpoints
-				</h3>
-				<div class="border border-yellow-400 p-6 mb-4 bg-black">
-					<div class="flex items-center justify-between mb-4">
-						<div>
-							<span class="bg-yellow-400 text-black px-3 py-1 font-mono text-sm font-bold mr-3">POST</span>
-							<span class="text-lg font-mono text-yellow-400">/scan</span>
-						</div>
-						<button onclick="testScanEndpoint()" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition">
-							Test
-						</button>
-					</div>
-					<p class="text-white mb-4">Initiate a new security scan for AI models, datasets, or spaces</p>
-					<div class="bg-black border border-yellow-400 p-4">
-						<label class="block text-sm font-semibold text-yellow-400 mb-2">Request Body:</label>
-						<textarea id="scanRequestBody" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(defaultScanJSON) }</textarea>
-					</div>
-					<div id="scanResponse" class="mt-4 hidden">
-						<label class="block text-sm font-semibold text-yellow-400 mb-2">Response:</label>
-						<pre class="bg-black border-2 border-yellow-400 text-yellow-400 p-4 overflow-x-auto text-sm"></pre>
-					</div>
-				</div>
-			</div>
-			<div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-6">
-				<h3 class="text-2xl font-bold mb-4 text-yellow-400">
-					Fetch Endpoints
-				</h3>
-				<div class="border border-yellow-400 p-6 mb-4 bg-black">
-					<div class="flex items-center justify-between mb-4">
-						<div>
-							<span class="bg-yellow-400 text-black px-3 py-1 font-mono text-sm font-bold mr-3">POST</span>
-							<span class="text-lg font-mono text-yellow-400">/fetch/model</span>
-						</div>
-						<button onclick="testFetchModel()" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition">
-							Test
-						</button>
-					</div>
-					<p class="text-white mb-4">Fetch and store AI model information from HuggingFace</p>
-					<div class="bg-black border border-yellow-400 p-4">
-						<label class="block text-sm font-semibold text-yellow-400 mb-2">Request Body:</label>
-						<textarea id="fetchModelBody" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(defaultFetchModelJSON) }</textarea>
-					</div>
-					<div id="fetchModelResponse" class="mt-4 hidden">
-						<label class="block text-sm font-semibold text-yellow-400 mb-2">Response:</label>
-						<pre class="bg-black border-2 border-yellow-400 text-yellow-400 p-4 overflow-x-auto text-sm"></pre>
-					</div>
-				</div>
-				<div class="border border-yellow-400 p-6 mb-4 bg-black">
-					<div class="flex items-center justify-between mb-4">
-						<div>
-							<span class="bg-yellow-400 text-black px-3 py-1 font-mono text-sm font-bold mr-3">POST</span>
-							<span class="text-lg font-mono text-yellow-400">/fetch/dataset</span>
-						</div>
-						<button onclick="testFetchDataset()" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition">
-							Test
-						</button>
-					</div>
-					<p class="text-white mb-4">Fetch and store dataset information from HuggingFace</p>
-					<div class="bg-black border border-yellow-400 p-4">
-						<label class="block text-sm font-semibold text-yellow-400 mb-2">Request Body:</label>
-						<textarea id="fetchDatasetBody" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(defaultFetchDatasetJSON) }</textarea>
-					</div>
-					<div id="fetchDatasetResponse" class="mt-4 hidden">
-						<label class="block text-sm font-semibold text-yellow-400 mb-2">Response:</label>
-						<pre class="bg-black border-2 border-yellow-400 text-yellow-400 p-4 overflow-x-auto text-sm"></pre>
-					</div>
-				</div>
-			</div>
-			<div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-6">
-				<h3 class="text-2xl font-bold mb-4 text-yellow-400">
-					Results Endpoints
-				</h3>
-				<div class="border border-yellow-400 p-6 mb-4 bg-black">
-					<div class="flex items-center justify-between mb-4">
-						<div>
-							<span class="bg-yellow-400 text-black px-3 py-1 font-mono text-sm font-bold mr-3">GET</span>
-							<span class="text-lg font-mono text-yellow-400">/api/results</span>
-						</div>
-						<button onclick="testGetAllResults()" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition">
-							Test
-						</button>
-					</div>
-					<p class="text-white mb-4">Get all scan results from the database</p>
-					<div id="allResultsResponse" class="mt-4 hidden">
-						<label class="block text-sm font-semibold text-yellow-400 mb-2">Response:</label>
-						<pre class="bg-black border-2 border-yellow-400 text-yellow-400 p-4 overflow-x-auto text-sm max-h-96"></pre>
-					</div>
-				</div>
-				<div class="border border-yellow-400 p-6 mb-4 bg-black">
-					<div class="flex items-center justify-between mb-4">
-						<div>
-							<span class="bg-yellow-400 text-black px-3 py-1 font-mono text-sm font-bold mr-3">GET</span>
-							<span class="text-lg font-mono text-yellow-400">/api/dashboard</span>
-						</div>
-						<button onclick="testDashboard()" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition">
-							Test
-						</button>
-					</div>
-					<p class="text-white mb-4">Get dashboard statistics and summary</p>
-					<div id="dashboardResponse" class="mt-4 hidden">
-						<label class="block text-sm font-semibold text-yellow-400 mb-2">Response:</label>
-						<pre class="bg-black border-2 border-yellow-400 text-yellow-400 p-4 overflow-x-auto text-sm"></pre>
-					</div>
-				</div>
-			</div>
-		</div>
-		<script type="text/javascript">
-			async function makeRequest(method, url, body) {
-				const options = {
-					method: method,
-					headers: {
-						'Content-Type': 'application/json',
-					}
-				};
-				
-				if (body) {
-					options.body = body;
-				}
-				
-				try {
-					const response = await fetch(url, options);
-					const data = await response.json();
-					return { status: response.status, data: data };
-				} catch (error) {
-					return { status: 'error', data: { error: error.message } };
-				}
-			}
-			
-			function displayResponse(elementId, response) {
-				const element = document.getElementById(elementId);
-				element.classList.remove('hidden');
-				const pre = element.querySelector('pre');
-				pre.textContent = JSON.stringify(response, null, 2);
-			}
-			
-			async function testScanEndpoint() {
-				const body = document.getElementById('scanRequestBody').value;
-				const response = await makeRequest('POST', '/scan', body);
-				displayResponse('scanResponse', response);
-			}
-			
-			async function testFetchModel() {
-				const body = document.getElementById('fetchModelBody').value;
-				const response = await makeRequest('POST', '/fetch/model', body);
-				displayResponse('fetchModelResponse', response);
-			}
-			
-			async function testFetchDataset() {
-				const body = document.getElementById('fetchDatasetBody').value;
-				const response = await makeRequest('POST', '/fetch/dataset', body);
-				displayResponse('fetchDatasetResponse', response);
-			}
-			
-			async function testGetAllResults() {
-				const response = await makeRequest('GET', '/api/results');
-				displayResponse('allResultsResponse', response);
-			}
-			
-			async function testDashboard() {
-				const response = await makeRequest('GET', '/api/dashboard');
-				displayResponse('dashboardResponse', response);
-			}
-		</script>
-	}
+    @Layout("API Tester") {
+        <div class="w-full">
+            <div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-6">
+                <h2 class="text-3xl font-bold mb-6 text-yellow-400">
+                    API Endpoint Tester
+                </h2>
+                <p class="text-white mb-6">Test all API endpoints interactively and see live responses</p>
+            </div>
+            <div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-6">
+                <h3 class="text-2xl font-bold mb-4 text-yellow-400">
+                    Scan Endpoints
+                </h3>
+                <div class="border border-yellow-400 p-6 mb-4 bg-black">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <span class="bg-yellow-400 text-black px-3 py-1 font-mono text-sm font-bold mr-3">POST</span>
+                            <span class="text-lg font-mono text-yellow-400">/scan</span>
+                        </div>
+                        <button 
+                            hx-post="/scan"
+                            hx-include="#scanRequestBody"
+                            hx-target="#scanResponse"
+                            hx-swap="innerHTML"
+                            hx-on::after-request="formatResponse(event, 'scanResponse')"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition">
+                            Test
+                        </button>
+                    </div>
+                    <p class="text-white mb-4">Initiate a new security scan for AI models, datasets, or spaces</p>
+                    <div class="bg-black border border-yellow-400 p-4">
+                        <label class="block text-sm font-semibold text-yellow-400 mb-2">Request Body:</label>
+                        <textarea id="scanRequestBody" name="body" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(util.DefaultScanJSON) }</textarea>
+                    </div>
+                    <div id="scanResponse" class="mt-4"></div>
+                </div>
+            </div>
+            <div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-6">
+                <h3 class="text-2xl font-bold mb-4 text-yellow-400">
+                    Fetch Endpoints
+                </h3>
+                <div class="border border-yellow-400 p-6 mb-4 bg-black">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <span class="bg-yellow-400 text-black px-3 py-1 font-mono text-sm font-bold mr-3">POST</span>
+                            <span class="text-lg font-mono text-yellow-400">/fetch/model</span>
+                        </div>
+                        <button 
+                            hx-post="/fetch/model"
+                            hx-include="#fetchModelBody"
+                            hx-target="#fetchModelResponse"
+                            hx-swap="innerHTML"
+                            hx-on::after-request="formatResponse(event, 'fetchModelResponse')"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition">
+                            Test
+                        </button>
+                    </div>
+                    <p class="text-white mb-4">Fetch and store AI model information from HuggingFace</p>
+                    <div class="bg-black border border-yellow-400 p-4">
+                        <label class="block text-sm font-semibold text-yellow-400 mb-2">Request Body:</label>
+                        <textarea id="fetchModelBody" name="body" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(util.DefaultFetchModelJSON) }</textarea>
+                    </div>
+                    <div id="fetchModelResponse" class="mt-4"></div>
+                </div>
+                <div class="border border-yellow-400 p-6 mb-4 bg-black">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <span class="bg-yellow-400 text-black px-3 py-1 font-mono text-sm font-bold mr-3">POST</span>
+                            <span class="text-lg font-mono text-yellow-400">/fetch/dataset</span>
+                        </div>
+                        <button 
+                            hx-post="/fetch/dataset"
+                            hx-include="#fetchDatasetBody"
+                            hx-target="#fetchDatasetResponse"
+                            hx-swap="innerHTML"
+                            hx-on::after-request="formatResponse(event, 'fetchDatasetResponse')"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition">
+                            Test
+                        </button>
+                    </div>
+                    <p class="text-white mb-4">Fetch and store dataset information from HuggingFace</p>
+                    <div class="bg-black border border-yellow-400 p-4">
+                        <label class="block text-sm font-semibold text-yellow-400 mb-2">Request Body:</label>
+                        <textarea id="fetchDatasetBody" name="body" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(util.DefaultFetchDatasetJSON) }</textarea>
+                    </div>
+                    <div id="fetchDatasetResponse" class="mt-4"></div>
+                </div>
+            </div>
+            <div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-6">
+                <h3 class="text-2xl font-bold mb-4 text-yellow-400">
+                    Results Endpoints
+                </h3>
+                <div class="border border-yellow-400 p-6 mb-4 bg-black">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <span class="bg-yellow-400 text-black px-3 py-1 font-mono text-sm font-bold mr-3">GET</span>
+                            <span class="text-lg font-mono text-yellow-400">/api/results</span>
+                        </div>
+                        <button 
+                            hx-get="/api/results"
+                            hx-target="#allResultsResponse"
+                            hx-swap="innerHTML"
+                            hx-on::after-request="formatResponse(event, 'allResultsResponse')"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition">
+                            Test
+                        </button>
+                    </div>
+                    <p class="text-white mb-4">Get all scan results from the database</p>
+                    <div id="allResultsResponse" class="mt-4"></div>
+                </div>
+                <div class="border border-yellow-400 p-6 mb-4 bg-black">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <span class="bg-yellow-400 text-black px-3 py-1 font-mono text-sm font-bold mr-3">GET</span>
+                            <span class="text-lg font-mono text-yellow-400">/api/dashboard</span>
+                        </div>
+                        <button 
+                            hx-get="/api/dashboard"
+                            hx-target="#dashboardResponse"
+                            hx-swap="innerHTML"
+                            hx-on::after-request="formatResponse(event, 'dashboardResponse')"
+                            class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 transition">
+                            Test
+                        </button>
+                    </div>
+                    <p class="text-white mb-4">Get dashboard statistics and summary</p>
+                    <div id="dashboardResponse" class="mt-4"></div>
+                </div>
+            </div>
+        </div>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <script type="text/javascript">
+            function formatResponse(event, targetId) {
+                const xhr = event.detail.xhr;
+                const target = document.getElementById(targetId);
+                let response;
+                try {
+                    response = JSON.parse(xhr.response);
+                } catch (e) {
+                    response = xhr.response;
+                }
+                const html = `
+                    <label class="block text-sm font-semibold text-yellow-400 mb-2">Response:</label>
+                    <pre class="bg-black border-2 border-yellow-400 text-yellow-400 p-4 overflow-x-auto text-sm ${targetId === 'allResultsResponse' ? 'max-h-96' : ''}">${JSON.stringify(response, null, 2)}</pre>
+                `;
+                target.innerHTML = html;
+            }
+        </script>
+    }
 }

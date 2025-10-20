@@ -2,18 +2,17 @@ package template
 
 import "github.com/MishraShardendu22/Scanner/models"
 import "fmt"
+import "github.com/MishraShardendu22/Scanner/util"
 
 templ ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages int) {
 	@Layout("Scan Results") {
 		<div class="w-full">
-			<!-- Header -->
 			<div class="bg-black border-4 border-yellow-400 shadow-lg p-8 mb-8 text-white">
 				<h1 class="text-4xl font-bold mb-2">
 					Scan Results
 				</h1>
 				<p class="text-white">View and manage all your security scan results</p>
 			</div>
-			<!-- Stats Overview -->
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 				<div class="bg-black border-4 border-yellow-400 shadow-md p-6">
 					<div class="flex items-center justify-between">
@@ -30,7 +29,7 @@ templ ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages i
 					<div class="flex items-center justify-between">
 						<div>
 							<p class="text-white text-sm font-medium">Total Resources</p>
-							<p class="text-3xl font-bold text-yellow-400 mt-2">{ fmt.Sprintf("%d", countTotalResources(results)) }</p>
+							<p class="text-3xl font-bold text-yellow-400 mt-2">{ fmt.Sprintf("%d", util.CountTotalResources(results)) }</p>
 						</div>
 						<div class="bg-yellow-400 p-3">
 							<i class="fas fa-database text-2xl text-black"></i>
@@ -41,7 +40,7 @@ templ ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages i
 					<div class="flex items-center justify-between">
 						<div>
 							<p class="text-white text-sm font-medium">Total Findings</p>
-							<p class="text-3xl font-bold text-yellow-400 mt-2">{ fmt.Sprintf("%d", countTotalFindingsInList(results)) }</p>
+							<p class="text-3xl font-bold text-yellow-400 mt-2">{ fmt.Sprintf("%d", util.CountTotalFindingsInList(results)) }</p>
 						</div>
 						<div class="bg-yellow-400 p-3">
 							<i class="fas fa-exclamation-triangle text-2xl text-black"></i>
@@ -60,7 +59,7 @@ templ ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages i
 					</a>
 				</div>
 				<div class="text-sm text-white">
-					Last updated: <span id="lastUpdate">{ getCurrentTime() }</span>
+					Last updated: <span id="lastUpdate">{ util.GetCurrentTime() }</span>
 				</div>
 			</div>
 			<!-- Results List -->
@@ -106,11 +105,11 @@ templ ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages i
 										<div class="text-xs text-gray-600">Scanned Resources</div>
 									</div>
 									<div class="text-center">
-										<div class="text-2xl font-bold text-red-600">{ fmt.Sprintf("%d", countFindings(result)) }</div>
+										<div class="text-2xl font-bold text-red-600">{ fmt.Sprintf("%d", util.CountFindings(result)) }</div>
 										<div class="text-xs text-gray-600">Security Findings</div>
 									</div>
 									<div class="text-center">
-										<div class="text-2xl font-bold text-purple-600">{ getResourceTypes(result) }</div>
+										<div class="text-2xl font-bold text-purple-600">{ util.GetResourceTypes(result) }</div>
 										<div class="text-xs text-gray-600">Resource Types</div>
 									</div>
 								</div>
@@ -178,42 +177,6 @@ templ ResultsListNew(results []models.SCAN_RESULT, currentPage int, totalPages i
 	}
 }
 
-func countFindings(result models.SCAN_RESULT) int {
-	count := 0
-	for _, resource := range result.ScannedResources {
-		count += len(resource.Findings)
-	}
-	return count
-}
-
-func countTotalResources(results []models.SCAN_RESULT) int {
-	count := 0
-	for _, result := range results {
-		count += len(result.ScannedResources)
-	}
-	return count
-}
-
-func countTotalFindingsInList(results []models.SCAN_RESULT) int {
-	count := 0
-	for _, result := range results {
-		count += countFindings(result)
-	}
-	return count
-}
-
-func getResourceTypes(result models.SCAN_RESULT) string {
-	typeMap := make(map[string]bool)
-	for _, resource := range result.ScannedResources {
-		typeMap[resource.Type] = true
-	}
-	return fmt.Sprintf("%d", len(typeMap))
-}
-
-func getCurrentTime() string {
-	return "Just now"
-}
-
 templ ResultDetailNew(result models.SCAN_RESULT) {
 	@Layout("Scan Result Details") {
 		<div class="w-full">
@@ -256,7 +219,7 @@ templ ResultDetailNew(result models.SCAN_RESULT) {
 					<div class="flex items-center justify-between">
 						<div>
 							<p class="text-white text-sm">Total Findings</p>
-							<p class="text-3xl font-bold mt-2 text-yellow-400">{ fmt.Sprintf("%d", countFindings(result)) }</p>
+							<p class="text-3xl font-bold mt-2 text-yellow-400">{ fmt.Sprintf("%d", util.CountFindings(result)) }</p>
 						</div>
 						<i class="fas fa-exclamation-circle text-4xl text-yellow-400"></i>
 					</div>
@@ -265,7 +228,7 @@ templ ResultDetailNew(result models.SCAN_RESULT) {
 					<div class="flex items-center justify-between">
 						<div>
 							<p class="text-white text-sm">Resource Types</p>
-							<p class="text-3xl font-bold mt-2 text-yellow-400">{ getResourceTypes(result) }</p>
+							<p class="text-3xl font-bold mt-2 text-yellow-400">{ util.GetResourceTypes(result) }</p>
 						</div>
 						<i class="fas fa-sitemap text-4xl text-yellow-400"></i>
 					</div>
@@ -345,7 +308,7 @@ templ ResultDetailNew(result models.SCAN_RESULT) {
 														Exposed Secret:
 													</p>
 													<code class="bg-black border border-yellow-400 text-yellow-400 px-3 py-2 text-sm block overflow-x-auto">
-														{ maskSecret(finding.Secret) }
+														{ util.MaskSecret(finding.Secret) }
 													</code>
 												</div>
 											</div>
@@ -393,11 +356,4 @@ templ ResultDetailNew(result models.SCAN_RESULT) {
 			</div>
 		</div>
 	}
-}
-
-func maskSecret(secret string) string {
-	if len(secret) <= 8 {
-		return "****" + secret[len(secret)-4:]
-	}
-	return secret[:4] + "****" + secret[len(secret)-4:]
 }

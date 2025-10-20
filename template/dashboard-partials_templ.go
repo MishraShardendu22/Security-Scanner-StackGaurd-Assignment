@@ -10,10 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"github.com/MishraShardendu22/Scanner/util"
 	"time"
 )
 
-// DashboardStatsPartial for HTMX updates
 func DashboardStatsPartial(totalScans, totalFindings, totalResources, criticalIssues int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -154,9 +154,9 @@ func RecentScansPartial(scans []RecentScanData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(formatTimeAgo(scan.CreatedAt))
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(util.FormatTimeAgo(scan.CreatedAt))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/dashboard-partials.templ`, Line: 84, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `template/dashboard-partials.templ`, Line: 84, Col: 77}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -213,29 +213,6 @@ func RecentScansPartial(scans []RecentScanData) templ.Component {
 		}
 		return nil
 	})
-}
-
-func formatTimeAgo(t time.Time) string {
-	now := time.Now()
-	diff := now.Sub(t)
-
-	minutes := int(diff.Minutes())
-	hours := int(diff.Hours())
-	days := int(diff.Hours() / 24)
-
-	if minutes < 1 {
-		return "Just now"
-	}
-	if minutes < 60 {
-		return fmt.Sprintf("%dm ago", minutes)
-	}
-	if hours < 24 {
-		return fmt.Sprintf("%dh ago", hours)
-	}
-	if days < 7 {
-		return fmt.Sprintf("%dd ago", days)
-	}
-	return t.Format("Jan 2")
 }
 
 var _ = templruntime.GeneratedTemplate
