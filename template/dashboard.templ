@@ -2,11 +2,7 @@ package template
 
 templ Dashboard() {
 	@Layout("Dashboard") {
-		<div class="w-full" 
-			hx-get="/api/dashboard" 
-			hx-trigger="load, every 5s" 
-			hx-target="#dashboardContent"
-			hx-swap="innerHTML">
+		<div class="w-full">
 			<div id="dashboardContent">
 				<!-- Stats Overview -->
 				<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -67,10 +63,7 @@ templ Dashboard() {
 								<span class="text-black text-sm font-medium">Live</span>
 							</div>
 							<button 
-								hx-get="/api/dashboard" 
-								hx-trigger="click" 
-								hx-target="#dashboardContent"
-								hx-swap="innerHTML"
+								onclick="fetchDashboardData()"
 								class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-4 py-2 transition">
 								<i class="fas fa-sync-alt mr-2"></i>Refresh
 							</button>
