@@ -16,19 +16,7 @@ import (
 	"github.com/kamva/mgm/v3"
 )
 
-var httpClient = &http.Client{
-
-	Timeout: 45 * time.Second,
-	Transport: &http.Transport{
-
-		MaxIdleConns:        200,
-		MaxIdleConnsPerHost: 50,
-		MaxConnsPerHost:     100,
-		IdleConnTimeout:     90 * time.Second,
-		DisableKeepAlives:   false,
-		DisableCompression:  false,
-	},
-}
+var httpClient = util.SharedHTTPClient()
 
 func UnifiedScan(c *fiber.Ctx) error {
 	var req models.ScanRequestBody
@@ -150,7 +138,7 @@ func UnifiedScan(c *fiber.Ctx) error {
 
 				"type":     resourceType,
 				"id":       resourceID,
-				"findings": formatFindings(resourceFindings),
+				"findings": util.FormatFindings(resourceFindings),
 			},
 		},
 		"timestamp":      time.Now().Format(time.RFC3339),
@@ -255,177 +243,20 @@ func fetchAndAddToRequest(aiRequest *models.AI_REQUEST, resourceID, resourceType
 		return err
 	}
 	if siblings, ok := resourceData["siblings"].([]interface{}); ok {
-		log.Printf("📂 Found %d files to fetch\n", len(siblings))
-		var wg sync.WaitGroup
-		var mu sync.Mutex
-		semaphore := make(chan struct{}, 30)
-		for idx, sib := range siblings {
-			if sibMap, ok := sib.(map[string]interface{}); ok {
-				if filename, ok := sibMap["rfilename"].(string); ok {
-					wg.Add(1)
-					go func(fname string, index int) {
-
-						defer wg.Done()
-						semaphore <- struct{}{}
-						defer func() { <-semaphore }()
-
-						log.Printf("  📄 [%d/%d] Fetching file: %s\n", index+1, len(siblings), fname)
-						sibling := fetchFileContentHelper(resourceID, fname)
-						mu.Lock()
-						aiRequest.Siblings = append(aiRequest.Siblings, sibling)
-						mu.Unlock()
-					}(filename, idx)
-				}
-			}
-		}
-		wg.Wait()
-
+		aiRequest.Siblings = util.FetchFilesFromSiblings(resourceID, siblings)
 		log.Printf("✅ All %d files fetched successfully\n", len(siblings))
 	}
 	if includePRs || includeDiscussions {
 		log.Println("💬 Fetching discussions and PRs...")
-		discussions, _ := fetchDiscussionsHelper(resourceID, resourceType, includePRs, includeDiscussions)
+		discussions, _ := util.FetchDiscussions(resourceID, resourceType, includePRs, includeDiscussions)
 		aiRequest.Discussions = discussions
-
 		log.Printf("✅ Fetched %d discussions/PRs\n", len(discussions))
 	}
 
 	return nil
 }
 
-func fetchDiscussionsHelper(id, resourceType string, includePRs, includeDiscussion bool) ([]models.DISCUSSION, error) {
-
-	var discussions []models.DISCUSSION
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-
-	if includePRs {
-		wg.Add(1)
-		go func() {
-
-			defer wg.Done()
-			url := fmt.Sprintf("https://huggingface.co/api/%s/%s/discussions?types=pr&status=all", resourceType, id)
-
-			log.Printf("  🔀 Fetching PRs from: %s\n", url)
-			prs, _ := fetchDiscussionsFromURL(url)
-			mu.Lock()
-			discussions = append(discussions, prs...)
-			mu.Unlock()
-
-			log.Printf("  ✅ Fetched %d PRs\n", len(prs))
-		}()
-	}
-	if includeDiscussion {
-		wg.Add(1)
-		go func() {
-
-			defer wg.Done()
-			url := fmt.Sprintf("https://huggingface.co/api/%s/%s/discussions?types=discussion&status=all", resourceType, id)
-
-			log.Printf("  💬 Fetching discussions from: %s\n", url)
-			discs, _ := fetchDiscussionsFromURL(url)
-			mu.Lock()
-			discussions = append(discussions, discs...)
-			mu.Unlock()
-
-			log.Printf("  ✅ Fetched %d discussions\n", len(discs))
-		}()
-	}
-	wg.Wait()
-
-	return discussions, nil
-}
-
-func fetchDiscussionsFromURL(url string) ([]models.DISCUSSION, error) {
-
-	resp, err := httpClient.Get(url)
-
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		return nil, err
-	}
-	var rawDiscussions []map[string]interface{}
-
-	if err := json.Unmarshal(body, &rawDiscussions); err != nil {
-		return nil, err
-	}
-	var discussions []models.DISCUSSION
-
-	for _, disc := range rawDiscussions {
-		discussion := models.DISCUSSION{}
-		if num, ok := disc["num"].(float64); ok {
-			discussion.Num = int64(num)
-		}
-		if title, ok := disc["title"].(string); ok {
-			discussion.Title = title
-		}
-		if status, ok := disc["status"].(string); ok {
-			discussion.Status = status
-		}
-		if isPR, ok := disc["isPullRequest"].(bool); ok {
-			discussion.IsPullRequest = isPR
-		}
-		if createdAt, ok := disc["createdAt"].(string); ok {
-			discussion.CreatedAt = createdAt
-		}
-		if author, ok := disc["author"].(map[string]interface{}); ok {
-			if name, ok := author["name"].(string); ok {
-				discussion.AuthorName = name
-			}
-		}
-		if repo, ok := disc["repo"].(map[string]interface{}); ok {
-			if name, ok := repo["name"].(string); ok {
-				discussion.RepoName = name
-			}
-		}
-		if numComments, ok := disc["numComments"].(float64); ok {
-			discussion.NumComments = int64(numComments)
-		}
-		if pinned, ok := disc["pinned"].(bool); ok {
-			discussion.Pinned = pinned
-		}
-		discussions = append(discussions, discussion)
-	}
-
-	return discussions, nil
-}
-
-func fetchFileContentHelper(resourceID, filename string) models.SIBLING {
-
-	sibling := models.SIBLING{
-
-		RFilename:   filename,
-		FileContent: "",
-	}
-
-	fileURL := fmt.Sprintf("https://huggingface.co/%s/resolve/main/%s", resourceID, filename)
-	resp, err := httpClient.Get(fileURL)
-
-	if err != nil {
-		log.Printf("  ⚠️  Failed to fetch %s: %v\n", filename, err)
-		return sibling
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("  ⚠️  File %s returned status %d\n", filename, resp.StatusCode)
-		return sibling
-	}
-	body, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		log.Printf("  ⚠️  Failed to read %s: %v\n", filename, err)
-		return sibling
-	}
-	sibling.FileContent = string(body)
-
-	return sibling
-}
+// Helper functions moved to util/huggingface.go and util/findings.go
 
 func scanOrganization(c *fiber.Ctx, org string, includePRs, includeDiscussions bool, scanID string) error {
 
@@ -529,7 +360,7 @@ func scanOrganization(c *fiber.Ctx, org string, includePRs, includeDiscussions b
 		formattedResources = append(formattedResources, map[string]interface{}{
 			"type":     resource.Type,
 			"id":       resource.ID,
-			"findings": formatFindings(resource.Findings),
+			"findings": util.FormatFindings(resource.Findings),
 		})
 	}
 
@@ -546,27 +377,4 @@ func scanOrganization(c *fiber.Ctx, org string, includePRs, includeDiscussions b
 	return util.ResponseAPI(c, fiber.StatusOK, "Organization scan completed successfully", response, "")
 }
 
-func formatFindings(findings []models.Finding) []map[string]interface{} {
-	formatted := []map[string]interface{}{}
-
-	for _, finding := range findings {
-		item := map[string]interface{}{
-
-			"secret_type": finding.SecretType,
-			"pattern":     util.MaskSecret(finding.Secret),
-			"secret":      util.MaskSecret(finding.Secret),
-		}
-
-		switch finding.SourceType {
-		case "file":
-			item["file"] = finding.FileName
-			item["line"] = finding.Line
-		case "discussion":
-			item["discussion"] = finding.DiscussionTitle
-			item["discussion_num"] = finding.DiscussionNum
-		}
-		formatted = append(formatted, item)
-	}
-
-	return formatted
-}
+// Helper functions moved to util/huggingface.go and util/findings.go

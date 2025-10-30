@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"fmt"
 	"log"
-	"sync"
 
 	"github.com/MishraShardendu22/Scanner/models"
 	"github.com/MishraShardendu22/Scanner/util"
@@ -38,7 +38,7 @@ func ScanRequest(c *fiber.Ctx) error {
 
 	log.Printf("✅ Scan complete! Found %d potential secrets\n", len(findings))
 
-	scannedResources := groupFindingsByResource(findings, aiRequest)
+	scannedResources := util.GroupFindingsByResource(findings)
 
 	scanResult := &models.SCAN_RESULT{
 
@@ -52,14 +52,8 @@ func ScanRequest(c *fiber.Ctx) error {
 
 	totalFindings := len(findings)
 
-	findingsByType := make(map[string]int)
-
-	findingsBySource := make(map[string]int)
-
-	for _, finding := range findings {
-		findingsByType[finding.SecretType]++
-		findingsBySource[finding.SourceType]++
-	}
+	findingsByType := util.CountFindingsByType(findings)
+	findingsBySource := util.CountFindingsBySource(findings)
 
 	return util.ResponseAPI(c, fiber.StatusOK, "Scan completed successfully", map[string]interface{}{
 
@@ -73,75 +67,27 @@ func ScanRequest(c *fiber.Ctx) error {
 }
 
 func ScanOrgModels(c *fiber.Ctx) error {
-
 	org := c.Params("org")
-
 	if org == "" {
 		return util.ResponseAPI(c, fiber.StatusBadRequest, "Organization name is required", nil, "")
 	}
 
-	log.Printf("🏢 Starting organization model scan: %s\n", org)
-
-	aiModels := []models.AI_Models{}
-
-	err := mgm.Coll(&models.AI_Models{}).SimpleFind(&aiModels, bson.M{"org": org})
-
+	allFindings, scannedCount, err := util.ScanOrgResources(org, util.ResourceTypeModel)
 	if err != nil {
-		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to fetch organization models", nil, "")
+		statusCode := fiber.StatusInternalServerError
+		if err.Error() == fmt.Sprintf("no %s found for this organization", util.ResourceTypeModel) {
+			statusCode = fiber.StatusNotFound
+		}
+		return util.ResponseAPI(c, statusCode, err.Error(), nil, "")
 	}
-	if len(aiModels) == 0 {
-		return util.ResponseAPI(c, fiber.StatusNotFound, "No models found for this organization", nil, "")
-	}
 
-	log.Printf("✅ Found %d models for organization\n", len(aiModels))
-	var allFindings []models.Finding
-	var scannedCount int
-
-	aiRequests := []models.AI_REQUEST{}
-	mgm.Coll(&models.AI_REQUEST{}).SimpleFind(&aiRequests, bson.M{})
-
-	log.Printf("🔍 Scanning %d requests...\n", len(aiRequests))
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-
-	semaphore := make(chan struct{}, 10)
-
-	for idx, req := range aiRequests {
-		wg.Add(1)
-		go func(r models.AI_REQUEST, index int) {
-
-			defer wg.Done()
-			semaphore <- struct{}{}
-			defer func() { <-semaphore }()
-
-			log.Printf("  [%d/%d] Scanning request: %s\n", index+1, len(aiRequests), r.RequestID)
-			findings := util.ScanAIRequest(r, util.SecretConfig)
-			mu.Lock()
-			allFindings = append(allFindings, findings...)
-			scannedCount++
-			mu.Unlock()
-			if len(findings) > 0 {
-				log.Printf("    ⚠️  Found %d secrets\n", len(findings))
-			}
-		}(req, idx)
-	}
-	wg.Wait()
-
-	log.Printf("✅ Scan complete! Total findings: %d\n", len(allFindings))
-
-	scannedResources := groupAllFindings(allFindings)
-
-	scanResult := &models.SCAN_RESULT{
-
-		RequestID:        "org-scan-" + org + "-models",
-		ScannedResources: scannedResources,
-	}
-	if err := mgm.Coll(scanResult).Create(scanResult); err != nil {
-		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to save scan results", nil, "")
+	scannedResources := util.GroupFindingsByResource(allFindings)
+	scanResult, err := util.SaveScanResults("org-scan-"+org+"-models", scannedResources)
+	if err != nil {
+		return util.ResponseAPI(c, fiber.StatusInternalServerError, err.Error(), nil, "")
 	}
 
 	return util.ResponseAPI(c, fiber.StatusOK, "Organization models scanned successfully", map[string]interface{}{
-
 		"scan_id":           scanResult.ID.Hex(),
 		"organization":      org,
 		"models_scanned":    scannedCount,
@@ -151,69 +97,27 @@ func ScanOrgModels(c *fiber.Ctx) error {
 }
 
 func ScanOrgDatasets(c *fiber.Ctx) error {
-
 	org := c.Params("org")
-
 	if org == "" {
 		return util.ResponseAPI(c, fiber.StatusBadRequest, "Organization name is required", nil, "")
 	}
 
-	aiDatasets := []models.AI_DATASETS{}
-
-	err := mgm.Coll(&models.AI_DATASETS{}).SimpleFind(&aiDatasets, bson.M{"org": org})
-
+	allFindings, scannedCount, err := util.ScanOrgResources(org, util.ResourceTypeDataset)
 	if err != nil {
-		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to fetch organization datasets", nil, "")
+		statusCode := fiber.StatusInternalServerError
+		if err.Error() == fmt.Sprintf("no %s found for this organization", util.ResourceTypeDataset) {
+			statusCode = fiber.StatusNotFound
+		}
+		return util.ResponseAPI(c, statusCode, err.Error(), nil, "")
 	}
-	if len(aiDatasets) == 0 {
-		return util.ResponseAPI(c, fiber.StatusNotFound, "No datasets found for this organization", nil, "")
-	}
-	var allFindings []models.Finding
-	var scannedCount int
 
-	aiRequests := []models.AI_REQUEST{}
-	mgm.Coll(&models.AI_REQUEST{}).SimpleFind(&aiRequests, bson.M{})
-
-	log.Printf("🔍 Scanning %d requests...\n", len(aiRequests))
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-
-	semaphore := make(chan struct{}, 10)
-
-	for idx, req := range aiRequests {
-		wg.Add(1)
-		go func(r models.AI_REQUEST, index int) {
-
-			defer wg.Done()
-			semaphore <- struct{}{}
-			defer func() { <-semaphore }()
-
-			log.Printf("  [%d/%d] Scanning request: %s\n", index+1, len(aiRequests), r.RequestID)
-			findings := util.ScanAIRequest(r, util.SecretConfig)
-			mu.Lock()
-			allFindings = append(allFindings, findings...)
-			scannedCount++
-			mu.Unlock()
-			if len(findings) > 0 {
-				log.Printf("    ⚠️  Found %d secrets\n", len(findings))
-			}
-		}(req, idx)
-	}
-	wg.Wait()
-
-	scannedResources := groupAllFindings(allFindings)
-
-	scanResult := &models.SCAN_RESULT{
-
-		RequestID:        "org-scan-" + org + "-datasets",
-		ScannedResources: scannedResources,
-	}
-	if err := mgm.Coll(scanResult).Create(scanResult); err != nil {
-		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to save scan results", nil, "")
+	scannedResources := util.GroupFindingsByResource(allFindings)
+	scanResult, err := util.SaveScanResults("org-scan-"+org+"-datasets", scannedResources)
+	if err != nil {
+		return util.ResponseAPI(c, fiber.StatusInternalServerError, err.Error(), nil, "")
 	}
 
 	return util.ResponseAPI(c, fiber.StatusOK, "Organization datasets scanned successfully", map[string]interface{}{
-
 		"scan_id":           scanResult.ID.Hex(),
 		"organization":      org,
 		"datasets_scanned":  scannedCount,
@@ -223,69 +127,27 @@ func ScanOrgDatasets(c *fiber.Ctx) error {
 }
 
 func ScanOrgSpaces(c *fiber.Ctx) error {
-
 	org := c.Params("org")
-
 	if org == "" {
 		return util.ResponseAPI(c, fiber.StatusBadRequest, "Organization name is required", nil, "")
 	}
 
-	aiSpaces := []models.AI_SPACES{}
-
-	err := mgm.Coll(&models.AI_SPACES{}).SimpleFind(&aiSpaces, bson.M{"org": org})
-
+	allFindings, scannedCount, err := util.ScanOrgResources(org, util.ResourceTypeSpace)
 	if err != nil {
-		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to fetch organization spaces", nil, "")
+		statusCode := fiber.StatusInternalServerError
+		if err.Error() == fmt.Sprintf("no %s found for this organization", util.ResourceTypeSpace) {
+			statusCode = fiber.StatusNotFound
+		}
+		return util.ResponseAPI(c, statusCode, err.Error(), nil, "")
 	}
-	if len(aiSpaces) == 0 {
-		return util.ResponseAPI(c, fiber.StatusNotFound, "No spaces found for this organization", nil, "")
-	}
-	var allFindings []models.Finding
-	var scannedCount int
 
-	aiRequests := []models.AI_REQUEST{}
-	mgm.Coll(&models.AI_REQUEST{}).SimpleFind(&aiRequests, bson.M{})
-
-	log.Printf("🔍 Scanning %d requests...\n", len(aiRequests))
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-
-	semaphore := make(chan struct{}, 10)
-
-	for idx, req := range aiRequests {
-		wg.Add(1)
-		go func(r models.AI_REQUEST, index int) {
-
-			defer wg.Done()
-			semaphore <- struct{}{}
-			defer func() { <-semaphore }()
-
-			log.Printf("  [%d/%d] Scanning request: %s\n", index+1, len(aiRequests), r.RequestID)
-			findings := util.ScanAIRequest(r, util.SecretConfig)
-			mu.Lock()
-			allFindings = append(allFindings, findings...)
-			scannedCount++
-			mu.Unlock()
-			if len(findings) > 0 {
-				log.Printf("    ⚠️  Found %d secrets\n", len(findings))
-			}
-		}(req, idx)
-	}
-	wg.Wait()
-
-	scannedResources := groupAllFindings(allFindings)
-
-	scanResult := &models.SCAN_RESULT{
-
-		RequestID:        "org-scan-" + org + "-spaces",
-		ScannedResources: scannedResources,
-	}
-	if err := mgm.Coll(scanResult).Create(scanResult); err != nil {
-		return util.ResponseAPI(c, fiber.StatusInternalServerError, "Failed to save scan results", nil, "")
+	scannedResources := util.GroupFindingsByResource(allFindings)
+	scanResult, err := util.SaveScanResults("org-scan-"+org+"-spaces", scannedResources)
+	if err != nil {
+		return util.ResponseAPI(c, fiber.StatusInternalServerError, err.Error(), nil, "")
 	}
 
 	return util.ResponseAPI(c, fiber.StatusOK, "Organization spaces scanned successfully", map[string]interface{}{
-
 		"scan_id":           scanResult.ID.Hex(),
 		"organization":      org,
 		"spaces_scanned":    scannedCount,
@@ -294,79 +156,7 @@ func ScanOrgSpaces(c *fiber.Ctx) error {
 	}, "")
 }
 
-func groupFindingsByResource(findings []models.Finding, _ *models.AI_REQUEST) []models.SCANNED_RESOURCE {
-
-	resourceMap := make(map[string]*models.SCANNED_RESOURCE)
-
-	for _, finding := range findings {
-		var resourceKey string
-		var resourceType string
-		var resourceID string
-		switch finding.SourceType {
-		case "file":
-			resourceType = "file"
-			resourceID = finding.FileName
-			resourceKey = "file:" + finding.FileName
-		case "discussion":
-			resourceType = "discussion"
-			resourceID = finding.DiscussionTitle
-			resourceKey = "discussion:" + finding.DiscussionTitle
-		}
-		if _, exists := resourceMap[resourceKey]; !exists {
-			resourceMap[resourceKey] = &models.SCANNED_RESOURCE{
-
-				Type:     resourceType,
-				ID:       resourceID,
-				Findings: []models.Finding{},
-			}
-		}
-		resourceMap[resourceKey].Findings = append(resourceMap[resourceKey].Findings, finding)
-	}
-	var scannedResources []models.SCANNED_RESOURCE
-
-	for _, resource := range resourceMap {
-		scannedResources = append(scannedResources, *resource)
-	}
-
-	return scannedResources
-}
-
-func groupAllFindings(findings []models.Finding) []models.SCANNED_RESOURCE {
-
-	resourceMap := make(map[string]*models.SCANNED_RESOURCE)
-
-	for _, finding := range findings {
-		var resourceKey string
-		var resourceType string
-		var resourceID string
-		switch finding.SourceType {
-		case "file":
-			resourceType = "file"
-			resourceID = finding.FileName
-			resourceKey = "file:" + finding.FileName
-		case "discussion":
-			resourceType = "discussion"
-			resourceID = finding.DiscussionTitle
-			resourceKey = "discussion:" + finding.DiscussionTitle
-		}
-		if _, exists := resourceMap[resourceKey]; !exists {
-			resourceMap[resourceKey] = &models.SCANNED_RESOURCE{
-
-				Type:     resourceType,
-				ID:       resourceID,
-				Findings: []models.Finding{},
-			}
-		}
-		resourceMap[resourceKey].Findings = append(resourceMap[resourceKey].Findings, finding)
-	}
-	var scannedResources []models.SCANNED_RESOURCE
-
-	for _, resource := range resourceMap {
-		scannedResources = append(scannedResources, *resource)
-	}
-
-	return scannedResources
-}
+// Helper functions moved to util/findings.go and util/org.scanner.go
 
 func ScanByID(c *fiber.Ctx) error {
 
@@ -390,7 +180,7 @@ func ScanByID(c *fiber.Ctx) error {
 
 	findings := util.ScanAIRequest(*aiRequest, util.SecretConfig)
 
-	scannedResources := groupFindingsByResource(findings, aiRequest)
+	scannedResources := util.GroupFindingsByResource(findings)
 
 	scanResult := &models.SCAN_RESULT{
 

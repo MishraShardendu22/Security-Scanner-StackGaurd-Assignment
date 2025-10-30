@@ -30,9 +30,7 @@ func GetScanResult(c *fiber.Ctx) error {
 	}
 
 	totalFindings := 0
-
 	findingsByType := make(map[string]int)
-
 	findingsByResource := make(map[string]int)
 
 	for _, resource := range scanResult.ScannedResources {
@@ -175,16 +173,7 @@ func GetDashboard(c *fiber.Ctx) error {
 
 func GetAllResults(c *fiber.Ctx) error {
 
-	page := c.QueryInt("page", 1)
-
-	limit := c.QueryInt("limit", 10)
-
-	if page < 1 {
-		page = 1
-	}
-	if limit < 1 || limit > 100 {
-		limit = 10
-	}
+	page, limit := util.ParsePagination(c)
 
 	skip := (page - 1) * limit
 

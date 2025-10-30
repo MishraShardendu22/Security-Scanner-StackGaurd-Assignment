@@ -1,4 +1,4 @@
-package util
+package util_model
 
 var DefaultScanJSON = `{
   "org": "huggingface",

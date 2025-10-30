@@ -1,7 +1,7 @@
-package template
+package templ_ms22
 
 import "strings"
-import "github.com/MishraShardendu22/Scanner/util"
+import "github.com/MishraShardendu22/Scanner/util/model"
 
 templ APITester() {
     @Layout("API Tester") {
@@ -35,7 +35,7 @@ templ APITester() {
                     <p class="text-white mb-4">Initiate a new security scan for AI models, datasets, or spaces</p>
                     <div class="bg-black border border-yellow-400 p-4">
                         <label class="block text-sm font-semibold text-yellow-400 mb-2">Request Body:</label>
-                        <textarea id="scanRequestBody" name="body" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(util.DefaultScanJSON) }</textarea>
+                        <textarea id="scanRequestBody" name="body" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(util_model.DefaultScanJSON) }</textarea>
                     </div>
                     <div id="scanResponse" class="mt-4"></div>
                 </div>
@@ -63,7 +63,7 @@ templ APITester() {
                     <p class="text-white mb-4">Fetch and store AI model information from HuggingFace</p>
                     <div class="bg-black border border-yellow-400 p-4">
                         <label class="block text-sm font-semibold text-yellow-400 mb-2">Request Body:</label>
-                        <textarea id="fetchModelBody" name="body" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(util.DefaultFetchModelJSON) }</textarea>
+                        <textarea id="fetchModelBody" name="body" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(util_model.DefaultFetchDatasetJSON) }</textarea>
                     </div>
                     <div id="fetchModelResponse" class="mt-4"></div>
                 </div>
@@ -86,7 +86,7 @@ templ APITester() {
                     <p class="text-white mb-4">Fetch and store dataset information from HuggingFace</p>
                     <div class="bg-black border border-yellow-400 p-4">
                         <label class="block text-sm font-semibold text-yellow-400 mb-2">Request Body:</label>
-                        <textarea id="fetchDatasetBody" name="body" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(util.DefaultFetchDatasetJSON) }</textarea>
+                        <textarea id="fetchDatasetBody" name="body" class="w-full h-32 p-3 border-2 border-yellow-400 bg-black text-yellow-400 font-mono text-sm">{ strings.TrimSpace(util_model.DefaultFetchDatasetJSON) }</textarea>
                     </div>
                     <div id="fetchDatasetResponse" class="mt-4"></div>
                 </div>

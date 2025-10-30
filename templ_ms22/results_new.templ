@@ -1,4 +1,4 @@
-package template
+package templ_ms22
 
 import "github.com/MishraShardendu22/Scanner/models"
 import "fmt"
@@ -308,7 +308,7 @@ templ ResultDetailNew(result models.SCAN_RESULT) {
 														Exposed Secret:
 													</p>
 													<code class="bg-black border border-yellow-400 text-yellow-400 px-3 py-2 text-sm block overflow-x-auto">
-														{ util.MaskSecret(finding.Secret) }
+														{ finding.Secret }
 													</code>
 												</div>
 											</div>
