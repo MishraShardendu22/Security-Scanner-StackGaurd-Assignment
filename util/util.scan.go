@@ -12,7 +12,7 @@ import (
 	util_model "github.com/MishraShardendu22/Scanner/util/model"
 )
 
-func ScanFile(file models.SIBLING, patterns []util_model.SecretPattern) []models.Finding {
+func ScanFile(file models.SIBLING, patterns []util_model.SecretPattern, resourceType, resourceID string) []models.Finding {
 
 	ext := strings.ToLower(filepath.Ext(file.RFilename))
 
@@ -23,19 +23,25 @@ func ScanFile(file models.SIBLING, patterns []util_model.SecretPattern) []models
 
 	lines := strings.Split(file.FileContent, "\n")
 
+	organization := ExtractOrgFromResourceID(resourceID)
+
 	for i, line := range lines {
 		for _, pattern := range patterns {
 			re := regexp.MustCompile(pattern.Regex)
 			matches := re.FindAllString(line, -1)
 			for _, match := range matches {
+				lineNum := i + 1
 				findings = append(findings, models.Finding{
-
-					SecretType: pattern.Name,
-					Pattern:    pattern.Regex,
-					Secret:     match,
-					SourceType: "file",
-					FileName:   file.RFilename,
-					Line:       i + 1,
+					SecretType:   pattern.Name,
+					Pattern:      pattern.Regex,
+					Secret:       match,
+					SourceType:   "file",
+					Organization: organization,
+					ResourceID:   resourceID,
+					ResourceType: resourceType,
+					FileName:     file.RFilename,
+					Line:         lineNum,
+					URL:          BuildHuggingFaceFileURL(resourceType, resourceID, file.RFilename, lineNum),
 				})
 			}
 		}
@@ -44,25 +50,30 @@ func ScanFile(file models.SIBLING, patterns []util_model.SecretPattern) []models
 	return findings
 }
 
-func ScanDiscussion(disc models.DISCUSSION, patterns []util_model.SecretPattern) []models.Finding {
+func ScanDiscussion(disc models.DISCUSSION, patterns []util_model.SecretPattern, resourceType, resourceID string) []models.Finding {
 
 	var findings []models.Finding
 
 	text := disc.Title + " " + disc.RepoName
+
+	organization := ExtractOrgFromResourceID(resourceID)
 
 	for _, pattern := range patterns {
 		re := regexp.MustCompile(pattern.Regex)
 		matches := re.FindAllString(text, -1)
 		for _, match := range matches {
 			findings = append(findings, models.Finding{
-
 				SecretType:      pattern.Name,
 				Pattern:         pattern.Regex,
 				Secret:          match,
 				SourceType:      "discussion",
+				Organization:    organization,
+				ResourceID:      resourceID,
+				ResourceType:    resourceType,
 				DiscussionNum:   disc.Num,
 				DiscussionTitle: disc.Title,
 				DiscussionRepo:  disc.RepoName,
+				URL:             BuildHuggingFaceDiscussionURL(resourceType, resourceID, disc.Num),
 			})
 		}
 	}
@@ -70,7 +81,7 @@ func ScanDiscussion(disc models.DISCUSSION, patterns []util_model.SecretPattern)
 	return findings
 }
 
-func ScanAIRequest(req models.AI_REQUEST, patterns []util_model.SecretPattern) []models.Finding {
+func ScanAIRequest(req models.AI_REQUEST, patterns []util_model.SecretPattern, resourceType, resourceID string) []models.Finding {
 
 	var wg sync.WaitGroup
 
@@ -92,7 +103,7 @@ func ScanAIRequest(req models.AI_REQUEST, patterns []util_model.SecretPattern) [
 			defer wg.Done()
 			semaphore <- struct{}{}
 			defer func() { <-semaphore }()
-			findings := ScanFile(file, patterns)
+			findings := ScanFile(file, patterns, resourceType, resourceID)
 			ch <- findings
 			count := atomic.AddInt32(&scannedCount, 1)
 			if len(findings) > 0 {
@@ -110,7 +121,7 @@ func ScanAIRequest(req models.AI_REQUEST, patterns []util_model.SecretPattern) [
 			defer wg.Done()
 			semaphore <- struct{}{}
 			defer func() { <-semaphore }()
-			findings := ScanDiscussion(disc, patterns)
+			findings := ScanDiscussion(disc, patterns, resourceType, resourceID)
 			ch <- findings
 			count := atomic.AddInt32(&scannedCount, 1)
 			if len(findings) > 0 {

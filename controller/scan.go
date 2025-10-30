@@ -34,7 +34,17 @@ func ScanRequest(c *fiber.Ctx) error {
 
 	log.Println("🔍 Scanning for secrets...")
 
-	findings := util.ScanAIRequest(*aiRequest, util.SecretConfig)
+	// Use resourceType and resourceID from the aiRequest if available, otherwise use defaults
+	resourceType := aiRequest.ResourceType
+	resourceID := aiRequest.ResourceID
+	if resourceType == "" {
+		resourceType = "unknown"
+	}
+	if resourceID == "" {
+		resourceID = "unknown"
+	}
+
+	findings := util.ScanAIRequest(*aiRequest, util.SecretConfig, resourceType, resourceID)
 
 	log.Printf("✅ Scan complete! Found %d potential secrets\n", len(findings))
 
@@ -178,7 +188,17 @@ func ScanByID(c *fiber.Ctx) error {
 		return util.ResponseAPI(c, fiber.StatusNotFound, "Request not found", nil, "")
 	}
 
-	findings := util.ScanAIRequest(*aiRequest, util.SecretConfig)
+	// Use resourceType and resourceID from the aiRequest if available
+	resourceType := aiRequest.ResourceType
+	resourceID := aiRequest.ResourceID
+	if resourceType == "" {
+		resourceType = "unknown"
+	}
+	if resourceID == "" {
+		resourceID = "unknown"
+	}
+
+	findings := util.ScanAIRequest(*aiRequest, util.SecretConfig, resourceType, resourceID)
 
 	scannedResources := util.GroupFindingsByResource(findings)
 

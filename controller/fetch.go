@@ -53,10 +53,11 @@ func FetchModel(c *fiber.Ctx) error {
 	includePRs, includeDiscussion := util.ParseIncludeFlags(c)
 
 	aiRequest := &models.AI_REQUEST{
-
-		RequestID:   uuid.New().String(),
-		Siblings:    []models.SIBLING{},
-		Discussions: []models.DISCUSSION{},
+		RequestID:    uuid.New().String(),
+		ResourceType: "models",
+		ResourceID:   modelID,
+		Siblings:     []models.SIBLING{},
+		Discussions:  []models.DISCUSSION{},
 	}
 
 	if siblings, ok := modelData["siblings"].([]interface{}); ok {
@@ -118,10 +119,11 @@ func FetchDataset(c *fiber.Ctx) error {
 	log.Printf("🚀 Fetching dataset: %s\n", datasetID)
 
 	aiRequest := &models.AI_REQUEST{
-
-		RequestID:   uuid.New().String(),
-		Siblings:    []models.SIBLING{},
-		Discussions: []models.DISCUSSION{},
+		RequestID:    uuid.New().String(),
+		ResourceType: "datasets",
+		ResourceID:   datasetID,
+		Siblings:     []models.SIBLING{},
+		Discussions:  []models.DISCUSSION{},
 	}
 	if siblings, ok := datasetData["siblings"].([]interface{}); ok {
 		aiRequest.Siblings = util.FetchFilesFromSiblings(datasetID, siblings)
@@ -180,10 +182,11 @@ func FetchSpace(c *fiber.Ctx) error {
 	log.Printf("🚀 Fetching space: %s\n", spaceID)
 
 	aiRequest := &models.AI_REQUEST{
-
-		RequestID:   uuid.New().String(),
-		Siblings:    []models.SIBLING{},
-		Discussions: []models.DISCUSSION{},
+		RequestID:    uuid.New().String(),
+		ResourceType: "spaces",
+		ResourceID:   spaceID,
+		Siblings:     []models.SIBLING{},
+		Discussions:  []models.DISCUSSION{},
 	}
 	if siblings, ok := spaceData["siblings"].([]interface{}); ok {
 		aiRequest.Siblings = util.FetchFilesFromSiblings(spaceID, siblings)

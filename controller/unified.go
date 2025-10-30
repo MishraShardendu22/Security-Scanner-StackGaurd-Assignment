@@ -32,7 +32,6 @@ func UnifiedScan(c *fiber.Ctx) error {
 	requestID := uuid.New().String()
 
 	aiRequest := &models.AI_REQUEST{
-
 		RequestID:   requestID,
 		Siblings:    []models.SIBLING{},
 		Discussions: []models.DISCUSSION{},
@@ -41,8 +40,10 @@ func UnifiedScan(c *fiber.Ctx) error {
 	var resourceType, resourceID string
 
 	if req.ModelID != "" {
-		resourceType = "model"
+		resourceType = "models"
 		resourceID = req.ModelID
+		aiRequest.ResourceType = resourceType
+		aiRequest.ResourceID = resourceID
 
 		log.Printf("📦 Fetching model: %s\n", req.ModelID)
 		if err := fetchAndAddToRequest(aiRequest, req.ModelID, "models", req.IncludePRs, req.IncludeDiscussions); err != nil {
@@ -51,8 +52,10 @@ func UnifiedScan(c *fiber.Ctx) error {
 
 		log.Printf("✅ Model fetched successfully with %d files\n", len(aiRequest.Siblings))
 	} else if req.DatasetID != "" {
-		resourceType = "dataset"
+		resourceType = "datasets"
 		resourceID = req.DatasetID
+		aiRequest.ResourceType = resourceType
+		aiRequest.ResourceID = resourceID
 
 		log.Printf("📦 Fetching dataset: %s\n", req.DatasetID)
 		if err := fetchAndAddToRequest(aiRequest, req.DatasetID, "datasets", req.IncludePRs, req.IncludeDiscussions); err != nil {
@@ -61,8 +64,10 @@ func UnifiedScan(c *fiber.Ctx) error {
 
 		log.Printf("✅ Dataset fetched successfully with %d files\n", len(aiRequest.Siblings))
 	} else if req.SpaceID != "" {
-		resourceType = "space"
+		resourceType = "spaces"
 		resourceID = req.SpaceID
+		aiRequest.ResourceType = resourceType
+		aiRequest.ResourceID = resourceID
 
 		log.Printf("📦 Fetching space: %s\n", req.SpaceID)
 		if err := fetchAndAddToRequest(aiRequest, req.SpaceID, "spaces", req.IncludePRs, req.IncludeDiscussions); err != nil {
@@ -89,7 +94,7 @@ func UnifiedScan(c *fiber.Ctx) error {
 
 	log.Println("🔍 Starting security scan...")
 
-	findings := util.ScanAIRequest(*aiRequest, util.SecretConfig)
+	findings := util.ScanAIRequest(*aiRequest, util.SecretConfig, resourceType, resourceID)
 
 	log.Printf("✅ Scan complete! Found %d potential secrets\n", len(findings))
 
@@ -311,16 +316,17 @@ func scanOrganization(c *fiber.Ctx, org string, includePRs, includeDiscussions b
 
 			log.Printf("  🔍 [%d/%d] Scanning model: %s\n", index+1, limit, id)
 			aiRequest := &models.AI_REQUEST{
-
-				RequestID:   uuid.New().String(),
-				Siblings:    []models.SIBLING{},
-				Discussions: []models.DISCUSSION{},
+				RequestID:    uuid.New().String(),
+				ResourceType: "models",
+				ResourceID:   id,
+				Siblings:     []models.SIBLING{},
+				Discussions:  []models.DISCUSSION{},
 			}
 			if err := fetchAndAddToRequest(aiRequest, id, "models", includePRs, includeDiscussions); err != nil {
 				log.Printf("  ⚠️  Failed to fetch model %s: %v\n", id, err)
 				return
 			}
-			findings := util.ScanAIRequest(*aiRequest, util.SecretConfig)
+			findings := util.ScanAIRequest(*aiRequest, util.SecretConfig, "models", id)
 			mu.Lock()
 			totalFindings += len(findings)
 			mu.Unlock()

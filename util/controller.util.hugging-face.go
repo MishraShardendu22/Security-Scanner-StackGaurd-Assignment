@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/MishraShardendu22/Scanner/models"
@@ -146,6 +148,12 @@ func FetchFilesFromSiblings(resourceID string, siblings []interface{}) []models.
 	for idx, sib := range siblings {
 		if sibMap, ok := sib.(map[string]interface{}); ok {
 			if filename, ok := sibMap["rfilename"].(string); ok {
+
+				ext := strings.ToLower(filepath.Ext(filename))
+				if !TextExtensions[ext] {
+					log.Printf("  ⏭️  [SKIP] Non-readable: %s", filename)
+					continue
+				}
 				wg.Add(1)
 				go func(fname string, index int) {
 					defer wg.Done()

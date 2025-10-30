@@ -51,6 +51,8 @@ type SIBLING struct {
 type AI_REQUEST struct {
 	mgm.DefaultModel `bson:",inline"`
 	RequestID        string       `json:"request_id" bson:"request_id"`
+	ResourceType     string       `json:"resource_type,omitempty" bson:"resource_type,omitempty"`
+	ResourceID       string       `json:"resource_id,omitempty" bson:"resource_id,omitempty"`
 	Siblings         []SIBLING    `json:"siblings" bson:"siblings"`
 	Discussions      []DISCUSSION `json:"discussions" bson:"discussions"`
 }
@@ -60,6 +62,10 @@ type Finding struct {
 	Pattern         string `json:"pattern" bson:"pattern"`
 	Secret          string `json:"secret" bson:"secret"`
 	SourceType      string `json:"source_type" bson:"source_type"`
+	Organization    string `json:"organization,omitempty" bson:"organization,omitempty"`
+	ResourceID      string `json:"resource_id,omitempty" bson:"resource_id,omitempty"`
+	ResourceType    string `json:"resource_type,omitempty" bson:"resource_type,omitempty"`
+	URL             string `json:"url,omitempty" bson:"url,omitempty"`
 	FileName        string `json:"file_name,omitempty" bson:"file_name,omitempty"`
 	Line            int    `json:"line,omitempty" bson:"line,omitempty"`
 	DiscussionNum   int64  `json:"discussion_num,omitempty" bson:"discussion_num,omitempty"`
