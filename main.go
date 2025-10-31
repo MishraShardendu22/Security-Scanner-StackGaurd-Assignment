@@ -12,10 +12,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/MishraShardendu22/Scanner/util"
+
 	"github.com/MishraShardendu22/Scanner/database"
 	"github.com/MishraShardendu22/Scanner/models"
 	"github.com/MishraShardendu22/Scanner/route"
-	"github.com/MishraShardendu22/Scanner/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -168,7 +169,7 @@ func setupLogger(config *models.Config) {
 		}
 	}
 
-	handler := slog.NewJSONHandler(writer, opts)
+	handler := util.NewPrettyTextHandler(writer, opts)
 
 	logger := slog.New(handler)
 	slog.SetDefault(logger)

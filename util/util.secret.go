@@ -1,11 +1,12 @@
 package util
 
-import util_model "github.com/MishraShardendu22/Scanner/util/model"
+import (
+	util_model "github.com/MishraShardendu22/Scanner/util/model"
+)
 
+// regex patterns for various secret types
 var SecretConfig = []util_model.SecretPattern{
-
 	{Name: "Box API Key", Regex: `[0-9a-z]{40}`},
-	{Name: "Algolia API Key", Regex: `[a-z0-9]{32}`},
 	{Name: "GitHub PAT", Regex: `ghp_[A-Za-z0-9]{36}`},
 	{Name: "Zoom JWT Key", Regex: `z0m[A-Za-z0-9]{32,}`},
 	{Name: "GitLab PAT", Regex: `glpat-[A-Za-z0-9]{20,}`},
@@ -46,6 +47,7 @@ var SecretConfig = []util_model.SecretPattern{
 	{Name: "Generic DB URI with creds", Regex: `[a-z0-9+\-]+:\/\/[^:\s\/]+:[^@\s\/]+@[^\/\s:]+(?::\d+)?\/[^\s]*`},
 }
 
+// readable files are set to true, if not true (empty, or false value then not readable)
 var TextExtensions = map[string]bool{
 	".sh": true, ".bash": true, ".zsh": true,
 	".csv": true, ".tsv": true, ".ipynb": true,
